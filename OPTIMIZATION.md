@@ -1,12 +1,16 @@
-# 未发布：Unreal Engine 5 工程师与配套链路
+# v3.6.0
+
+本版把此前累积的未发布能力线一次性定版：`plugin.json` 版本 3.6.0 与 tag `v3.6.0` 一致，INSTALL 标题与缓存路径示例同步。发布前校验：validate_repo 69 checks / 0 warnings / 0 errors、skill_lint 20/20 PASS、unittest 31 tests OK。
+
+## Unreal Engine 5 工程师与配套链路
 
 - 新增 `subagents/unreal-engineer.toml` 与 `skills/unreal-engineering/SKILL.md`：按「UE 大版本 + 目标平台」锁定结论，覆盖模块与目录划分、蓝图/C++ 职责分层、Gameplay Framework 落位、BuildCookRun 打包排障、包体与性能实测，以及设计确认项的 @trace 覆盖率门禁。
 - 总编排与端到端流水线接入 `unreal-engineer` 派发（角色表、Workflow S/A/E、tech 阶段与 G2 派单）；`unreal-engineering` 进入引擎技能分组。Unreal 暂未提供起步模板，平台支持结论不套用三引擎矩阵，由角色按 Epic 官方文档单独核实。
 - `omni_state.py` 与 `build_check.py` 引擎枚举加入 `unreal`：支持 .uproject 自动识别、RunUAT BuildCookRun 说明、截图能力如实返回 NOT ASSESSED，不谎称通过；`plugin.json` 描述与关键词同步。
 - 双语 README、INSTALL、插件说明、文档模板与各角色/技能的引擎边界描述同步为四引擎；技能数 14→15、可选角色数 8→9。
-- 边界：`multiplatform-release` 的 engine-matrix 仍为 Cocos / Unity / Godot 三引擎事实矩阵，未凭记忆补 Unreal 的平台支持结论。版本保持 3.5.0，本条按项目惯例记入「未发布」区块。
+- 边界：`multiplatform-release` 的 engine-matrix 仍为 Cocos / Unity / Godot 三引擎事实矩阵，未凭记忆补 Unreal 的平台支持结论。本条随 v3.6.0 发布。
 
-# 未发布：软著申报能力线
+## 软著申报能力线
 
 - 新增 5 个软著申报技能：`copyright-filing`（主理人总编排，含 W1–W7 工作流与单角色直调路由）、`software-name-checker`（13 项命名规则 / 六渠道核查 / 三档结论 / Phase 0.5 名称锁死）、`copyright-material-kit`（60 页 × 每页 50 行源程序文档、说明书、申请表、材料清单）、`copyright-risk-audit`（12 项风险分级 + 提交前自评表 + 红线）、`copyright-filing-guide`（单文件 HTML 小白指导报告 + FAQ）。
 - 新增 4 个可选角色 TOML：主理人 `copyright-filing-lead`、材料 `copyright-material-smith`、风控 `copyright-risk-auditor`、指导 `copyright-guide-designer`，与现有 9 个游戏角色（含 Unreal）并列。
@@ -16,9 +20,9 @@
 - 宿主差异如实写明：Codex 无 WorkBuddy 团队运行时工具，协作以流程契约表达而非工具调用；可移植的是机制思想，不是宿主专有文件。
 - 全仓计数统一校准：技能 15→20、可选角色 9→13、脚本 13→16、文档模板 10→14（另新增 4 份软著模板）；双语 README、INSTALL、插件说明与 `scripts/README.md` 同步。`ADOPTION.md` 的 v3.5.0 基线快照按其文件内注记保持不动。
 - 边界：软著登记是形式审查，查名称不是为过审而是避免商标与应用商店冲突；脚本只做静态检查，不替代六渠道人工核查与官方审查；不承诺过审、不替用户做法律判断。
-- 版本保持 3.5.0，本条按项目惯例记入「未发布」区块，不 bump 版本；正式发版时统一改为 v3.6.0，并同步 `plugin.json` 与 INSTALL 的缓存路径示例。
+- 本版本定版为 v3.6.0：tag 与 `plugin.json` 版本一致，INSTALL 标题与缓存路径示例已同步。
 
-# 未发布：证据闭环、会话检查点与技能自测
+## 证据闭环、会话检查点与技能自测
 
 - `build_check.py` 新增 `--capture` / `--capture-only`：构建后无人值守启动引擎并截图，证据落在 `docs/qa/evidence/<名字>/`，同目录 `receipt.json` 记录所覆盖改动文件的 sha256。Godot 用 `--write-movie --quit-after` 原生支持；Unity 与 Cocos 无内置无人值守截图，返回 `NOT ASSESSED` 并给可用命令，不假装成功。
 - `omni_state.py` 新增 `evidence list|check`：按 sha256 判断证据是否仍代表当前代码，被覆盖文件改过即判定过期；`advance` 离开 `qa` 阶段时默认校验证据，`--no-evidence` 可显式跳过。
@@ -27,7 +31,7 @@
 - 新增 `scripts/skill_lint.py` 与 `tests/test_skill_lint.py`：7 条结构检查、四值判分，发版前跑一次；首跑即查出两个技能缺触发条件、两处跨技能引用会扑空，均已修。
 - 新增 `templates/active.md`；QA 文档模板增加「截图证据」小节。
 
-# 未发布：CI 门禁与仓库自检
+## CI 门禁与仓库自检
 
 - 新增 GitHub Actions CI（`.github/workflows/ci.yml`）：仓库清单校验、技能结构检查、Python 3.9 / 3.12 / 3.13 三版本回归测试，另设 `CI gate` 汇总状态，供分支保护只勾一个检查项。
 - 新增 `tools/validate_repo.py`（零第三方依赖）：校验市场清单能解析到真实插件目录、`plugin.json` 必填字段与 semver、界面图资源存在性、`SKILL.md` frontmatter 与目录一致、`references/` 死链、子代理 TOML 字段、脚本语法及误提交的 API 密钥。

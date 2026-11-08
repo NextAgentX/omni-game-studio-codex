@@ -1,6 +1,6 @@
 {
   "name": "omni-game-studio",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "Game production skills for Cocos Creator, Unity, Godot and Unreal Engine 5 with concept, vertical slice, sprint, alpha/beta/gold, release and live-ops workflows plus AI image, animation, sound and music guidance. Adds a China software copyright (software copyright / 软著) filing line: name pre-check, compliant source-code and manual documents, risk audit and beginner guidance.",
   "author": {
     "name": "AgentX"
