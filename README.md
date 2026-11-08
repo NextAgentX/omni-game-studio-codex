@@ -68,14 +68,14 @@ The seven document gates (`brief`, `gdd`, `tech`, `art`, `audio`, `qa`, and `rel
 
 #### Requirements
 
-- Codex with local plugin-marketplace support.
+- Codex CLI with Git plugin-marketplace support.
 - Python 3.9+ for the bundled scripts.
 - Pillow for image processing, sprite-sheet splitting, atlas packing, and some asset checks.
 - `OPENAI_API_KEY` or `ELEVENLABS_API_KEY` only when you choose the corresponding direct API adapter. Native tools available in a Codex session may have different setup requirements.
 
 #### Install
 
-Clone the repository, then follow [INSTALL.md](INSTALL.md) to register the `marketplace/` directory and install `omni-game-studio` from the `omni-game-studio-plugins` marketplace. The guide includes Windows and Unix-like shell examples, optional specialist profiles, media-generation setup, and the distinction between session tools and API credentials.
+Follow [INSTALL.md](INSTALL.md) to install `omni-game-studio` directly from the GitHub marketplace, upgrade it from the latest repository version, or use a local checkout. The guide includes Windows and Unix-like shell examples, migration from the local marketplace, optional specialist profiles, media-generation setup, and the distinction between session tools and API credentials.
 
 #### Use it in a game project
 

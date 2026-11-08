@@ -1,0 +1,20 @@
+{
+  "name": "omni-game-studio-plugins",
+  "interface": {
+    "displayName": "Omni Game Studio Plugins"
+  },
+  "plugins": [
+    {
+      "name": "omni-game-studio",
+      "source": {
+        "source": "local",
+        "path": "./marketplace/plugins/omni-game-studio"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    }
+  ]
+}

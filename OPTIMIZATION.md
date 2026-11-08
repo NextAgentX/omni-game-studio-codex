@@ -1,3 +1,9 @@
+# v3.5.0 GitHub 在线安装与升级
+
+- 在仓库根目录增加 `.agents/plugins/marketplace.json`，使 Codex 可通过 GitHub 仓库根路径发现嵌套的 `marketplace/plugins/omni-game-studio` 插件。
+- 在双语 README 与安装指南中补充在线安装、刷新 Git 市场、重新安装升级，以及从旧本地市场迁移的命令。
+- 保留本地市场安装方式作为备用，并将插件版本更新到 3.5.0。
+
 # v3.4.3 Marketplace 命名统一
 
 - 将本地插件市场 ID 统一为 `omni-game-studio-plugins`，并更新安装命令、README 和缓存路径示例。

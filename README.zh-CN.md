@@ -50,14 +50,14 @@ Omni Game Studio 为 Codex 提供这些分工明确的工作流，帮助把需�
 
 #### 环境要求
 
-- 支持本地插件市场的 Codex。
+- 支持 Git 插件市场的 Codex CLI。
 - Python 3.9+，用于运行插件脚本。
 - Pillow：图片处理、精灵表切帧、图集打包和部分资源检查需要。
 - 只有选择直接 API 适配器时才需要 `OPENAI_API_KEY` 或 `ELEVENLABS_API_KEY`。Codex 会话原生工具的配置要求可能不同。
 
 #### 安装
 
-先克隆仓库，再按 [INSTALL.md](INSTALL.md) 注册 `marketplace/` 并从 `omni-game-studio-plugins` 市场安装 `omni-game-studio`。安装指南包含 Windows 和类 Unix 命令、可选专业角色、媒体生成配置，以及会话工具与 API 凭证的区别。
+按 [INSTALL.md](INSTALL.md) 从 GitHub 插件市场直接安装 `omni-game-studio`，并从仓库在线升级；也可选择本地克隆安装。指南包含 Windows 和类 Unix 命令、从本地市场迁移的方法、可选专业角色、媒体生成配置，以及会话工具与 API 凭证的区别。
 
 #### 在游戏项目中使用
 

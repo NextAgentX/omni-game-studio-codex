@@ -1,21 +1,56 @@
-# Omni Game Studio v3.4.3 安装与 AI 素材使用
+# Omni Game Studio v3.5.0 安装与 AI 素材使用
 
-本包包含本地市场、14 个技能、12 个脚本、10 份制作文档模板、游戏引擎模板，以及 8 个可选角色配置。插件不会自带 API 凭证或保证模型调用额度。
+本仓库支持通过 GitHub 插件市场在线安装和升级，也保留本地市场安装方式；包含 14 个技能、12 个脚本、10 份制作文档模板、游戏引擎模板，以及 8 个可选角色配置。插件不会自带 API 凭证或保证模型调用额度。
 
 制作流程模板新增 `07-production-roadmap.md`、`08-sprint-review.md` 和 `09-milestones.md`，用于路线图、可玩 Sprint 复盘及 G1–G5/运营评审记录。它们补充制作生命周期；文档检查本身不会替代真实构建、测试或签核。
 
-## 安装插件
+## 在线安装（推荐）
 
-将 `marketplace/` 完整复制到本机本地市场目录，例如 `~/.codex/local-marketplaces/omni-game-studio-plugins/`（目标目录下应直接有 `.agents/` 和 `plugins/`）。按当前 Codex 版本注册该市场并安装：
+无需克隆仓库或手动复制文件。Codex CLI 可直接从 GitHub 跟踪插件市场：
+
+```bash
+codex plugin marketplace add NextAgentX/omni-game-studio-codex --ref main
+codex plugin add omni-game-studio@omni-game-studio-plugins
+codex plugin list
+```
+
+Windows PowerShell 使用相同命令。安装后重新打开 Codex 会话，让新技能生效。
+
+### 在线升级
+
+发布新版本后，先刷新 GitHub 市场，再移除并重新安装插件以刷新本地缓存（当前 Codex CLI 没有单独的 `plugin update` 子命令）：
+
+```bash
+codex plugin marketplace upgrade omni-game-studio-plugins
+codex plugin remove omni-game-studio@omni-game-studio-plugins
+codex plugin add omni-game-studio@omni-game-studio-plugins
+codex plugin list
+```
+
+重新安装会读取 GitHub 上最新的插件版本。若 Codex 正在运行，请重启 Codex 或新开会话。也可在 Codex 插件目录中刷新 `Omni Game Studio Plugins` 市场后安装最新版本。
+
+### 从旧本地市场迁移
+
+如果此前通过本地文件夹安装，先移除旧的插件注册和市场注册，再添加 GitHub 市场。该操作不会删除你的本地市场源文件：
+
+```bash
+codex plugin remove omni-game-studio@omni-game-studio-plugins
+codex plugin marketplace remove omni-game-studio-plugins
+codex plugin marketplace add NextAgentX/omni-game-studio-codex --ref main
+codex plugin add omni-game-studio@omni-game-studio-plugins
+```
+
+若当前 Codex 环境尚不支持 Git 市场，可继续使用下方本地安装方式。`subagents/*.toml` 可选安装到 `~/.codex/agents/`；没有子代理时插件仍可工作。
+
+## 本地安装（备用）
+
+将 `marketplace/` 完整复制到本机本地市场目录，例如 `~/.codex/local-marketplaces/omni-game-studio-plugins/`（目标目录下应直接有 `.agents/` 和 `plugins/`），然后注册并安装：
 
 ```bash
 codex plugin marketplace add ~/.codex/local-marketplaces/omni-game-studio-plugins
 codex plugin add omni-game-studio@omni-game-studio-plugins
 codex plugin list
-python -m pip install pillow
 ```
-
-如果已注册同名市场，更新其源目录后按本机插件管理方式升级或重新安装，然后新开会话确认版本。`subagents/*.toml` 可选安装到 `~/.codex/agents/`；没有子代理时插件仍可工作。Windows 用户按本机终端语法调整路径。
 
 ## AI 图片和动效
 
@@ -23,7 +58,7 @@ Codex 会话内置的图像生成工具由宿主提供，可直接生成或编�
 
 ```bash
 # 根据实际插件缓存路径调整 PL
-PL="$HOME/.codex/plugins/cache/omni-game-studio-plugins/omni-game-studio/3.4.3"
+PL="$HOME/.codex/plugins/cache/omni-game-studio-plugins/omni-game-studio/3.5.0"
 python "$PL/scripts/split_sprite_sheet.py" --input raw/run_sheet.png --cols 4 --rows 2 --frames 8 --fps 12 --loop --out-dir assets/animation/run --backup-dir doc/temp/run-frames
 python "$PL/scripts/gen_ai_image.py" --prompt "small astronaut waves, 8-frame animation" --format gif --frames 8 --out assets/animation/wave.gif --backup-dir doc/temp
 ```
@@ -36,7 +71,7 @@ python "$PL/scripts/gen_ai_image.py" --prompt "small astronaut waves, 8-frame an
 
 ```bash
 # 先预览，不联网、不计费、不需要密钥
-PL="$HOME/.codex/plugins/cache/omni-game-studio-plugins/omni-game-studio/3.4.3"
+PL="$HOME/.codex/plugins/cache/omni-game-studio-plugins/omni-game-studio/3.5.0"
 python "$PL/scripts/gen_ai_audio.py" sfx --prompt "short bright pickup chime" --duration 1 --out assets/audio/pickup.mp3 --dry-run
 # 去掉 --dry-run 后才实际请求生成
 python "$PL/scripts/gen_ai_audio.py" music --prompt "gentle space exploration" --duration 30 --instrumental --out assets/audio/main.mp3
