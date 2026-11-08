@@ -1,2 +1,5 @@
 __pycache__/
 *.py[cod]
+
+# Local agent workspace data (memory, logs) — not part of the shipped plugin
+.workbuddy-ai/

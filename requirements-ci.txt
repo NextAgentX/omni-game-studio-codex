@@ -1,0 +1,3 @@
+# Test-only dependencies for CI. The shipped scripts stay dependency-free
+# except for Pillow (image processing) and ffmpeg (audio, optional).
+pillow>=10.0

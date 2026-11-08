@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to publish (for example v3.5.0)
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  PYTHONIOENCODING: utf-8
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  publish:
+    name: Verify and publish plugin package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-ci.txt
+
+      - name: Resolve version
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [ -n "${{ inputs.tag }}" ]; then tag="${{ inputs.tag }}"; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate repository
+        run: python tools/validate_repo.py
+
+      - name: Lint skills
+        working-directory: marketplace/plugins/omni-game-studio
+        run: python scripts/skill_lint.py
+
+      - name: Run regression tests
+        working-directory: marketplace/plugins/omni-game-studio
+        run: python -m unittest discover -s tests -v
+
+      - name: Check tag matches plugin.json version
+        run: |
+          declared=$(python -c "import json,pathlib;print(json.loads(pathlib.Path('marketplace/plugins/omni-game-studio/.codex-plugin/plugin.json').read_text(encoding='utf-8'))['version'])")
+          tag="${{ steps.version.outputs.tag }}"
+          version="${{ steps.version.outputs.version }}"
+          echo "tag=$tag declared=$declared"
+          if [ "$tag" != "v$version" ]; then
+            echo "::error::tag $tag must look like v<plugin.json version> (v$declared)"
+            exit 1
+          fi
+          if [ "$declared" != "$version" ]; then
+            echo "::error::plugin.json declares $declared but the tag says $version"
+            exit 1
+          fi
+
+      - name: Build plugin archive
+        run: |
+          mkdir -p dist
+          version="${{ steps.version.outputs.version }}"
+          git archive --format=zip \
+            --prefix="omni-game-studio-$version/" \
+            -o "dist/omni-game-studio-$version.zip" \
+            "HEAD:marketplace/plugins/omni-game-studio"
+          ( cd dist && sha256sum "omni-game-studio-$version.zip" > SHA256SUMS.txt )
+          ls -lh dist
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          version="${{ steps.version.outputs.version }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" dist/* --clobber
+          else
+            gh release create "$tag" dist/* \
+              --title "Omni Game Studio v$version" \
+              --generate-notes \
+              --verify-tag
+          fi
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: omni-game-studio-${{ steps.version.outputs.version }}
+          path: dist/
+          retention-days: 14

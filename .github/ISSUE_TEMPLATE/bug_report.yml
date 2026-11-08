@@ -1,0 +1,90 @@
+name: Bug report
+description: Something in a skill, script, template or the plugin manifest is wrong or broken.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. This repository ships **workflows and scripts**, not a game.
+        If your game fails to build, first check whether the step actually ran — a parse or
+        document check is not a build, and a build is not a playtest.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you ran or asked for, and what you observed instead.
+      placeholder: |
+        Asked for "..." with the godot-engineering skill, the skill told me to run X,
+        then X exited with ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands or prompts. Redact API keys.
+      placeholder: |
+        1. Install v3.x.y from the marketplace
+        2. Run `python scripts/validate_assets.py --manifest assets/manifest.json`
+        3. See error ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      description: Pick the closest match. Choose "unknown" if unsure.
+      options:
+        - skill content (workflow, guidance, references)
+        - script (scripts/*.py)
+        - template or starter project
+        - plugin manifest / marketplace install
+        - documentation (README, INSTALL, OPTIMIZATION)
+        - CI / validation tooling
+        - unknown
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      description: From `.codex-plugin/plugin.json`, or the release tag you installed.
+      placeholder: "3.5.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows 10 / 11
+        - macOS
+        - Linux
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs, screenshots or artifacts
+      description: Paste output or drag files in. Include whether a build or a playtest actually happened.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I did not include API keys, credentials or paid-account details.
+          required: true
+        - label: I checked whether the documented limitation already explains this (README "Limits and verification").
+          required: true

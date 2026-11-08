@@ -4,7 +4,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-[![GitHub stars](https://img.shields.io/github/stars/NextAgentX/omni-game-studio-codex?style=social)](https://github.com/NextAgentX/omni-game-studio-codex/stargazers) [![Issues](https://img.shields.io/github/issues/NextAgentX/omni-game-studio-codex)](https://github.com/NextAgentX/omni-game-studio-codex/issues)
+[![GitHub stars](https://img.shields.io/github/stars/NextAgentX/omni-game-studio-codex?style=social)](https://github.com/NextAgentX/omni-game-studio-codex/stargazers) [![Issues](https://img.shields.io/github/issues/NextAgentX/omni-game-studio-codex)](https://github.com/NextAgentX/omni-game-studio-codex/issues) [![CI](https://github.com/NextAgentX/omni-game-studio-codex/actions/workflows/ci.yml/badge.svg)](https://github.com/NextAgentX/omni-game-studio-codex/actions/workflows/ci.yml)
 
 Omni Game Studio gives Codex an engine-aware toolkit for game production. It brings together focused skills, optional specialist role prompts, starter projects, document templates, and production scripts for **Cocos Creator, Unity, and Godot**.
 
@@ -18,6 +18,7 @@ Use it for one focused task in an existing game or for a project that is still a
 - [Getting started](#getting-started)
 - [AI art, animation, and audio](#ai-art-animation-and-audio)
 - [Templates, scripts, and checks](#templates-scripts-and-checks)
+- [Repository checks](#repository-checks)
 - [Limits and verification](#limits-and-verification)
 - [Contributing](#contributing)
 - [Support the project](#support-the-project)
@@ -34,7 +35,7 @@ Omni Game Studio provides focused workflows for those jobs. It helps turn requir
 |---|---|
 | Skills | 14 Codex skills for orchestration, design, engine engineering, assets, QA, release, and live operations |
 | Optional role prompts | 8 specialist TOML profiles: Cocos, Unity, Godot, art, audio, narrative, QA, and release |
-| Production scripts | 12 Python tools for AI media adapters, asset processing, manifests, builds, audio, and pipeline state |
+| Production scripts | 13 Python tools for AI media adapters, asset processing, manifests, builds, run evidence, audio, and pipeline state |
 | Document templates | 10 project documents, including a production roadmap, Sprint review, and G1–G5 milestone record |
 | Engine starters | Small starter projects for Godot 4, Unity, and Cocos Creator 3.x |
 
@@ -122,19 +123,29 @@ The `templates/docs/` directory contains the seven stage documents and three lif
 
 The `scripts/` directory includes:
 
-- `omni_state.py` for document-stage tracking and gates.
+- `omni_state.py` for document-stage tracking and gates, screenshot-evidence checks, and the session checkpoint.
 - `gen_ai_image.py`, `gen_ai_audio.py`, `gen_music.py`, and `gen_sfx.py` for image/audio workflows.
 - `process_art.py`, `split_sprite_sheet.py`, `pack_atlas.py`, and `compress_audio.py` for asset preparation.
-- `validate_assets.py` and `build_check.py` for asset and build checks.
+- `validate_assets.py` and `build_check.py` for asset and build checks; `--capture` runs the game and keeps a screenshot with a hash receipt.
 - `gen_placeholder_art.py` for pipeline-only placeholders; placeholders are not final game art.
+- `skill_lint.py` for structural self-tests of the skills themselves.
 
-Run the script-specific `--help` for parameters. For plugin development, the current regression command is:
+Run the script-specific `--help` for parameters. Some image tools require Pillow; audio compression can use ffmpeg. See [scripts/README.md](marketplace/plugins/omni-game-studio/scripts/README.md), [templates/README.md](marketplace/plugins/omni-game-studio/templates/README.md), and [OPTIMIZATION.md](OPTIMIZATION.md) for more detail.
+
+### Repository checks
+
+CI validates the repository itself, not your game. The same three commands run locally and on every push:
 
 ```bash
-python -m unittest discover -s marketplace/plugins/omni-game-studio/tests -v
+python tools/validate_repo.py                  # manifests, plugin manifest, links, script syntax
+cd marketplace/plugins/omni-game-studio
+python scripts/skill_lint.py                   # SKILL.md structure and reference resolution
+python -m unittest discover -s tests -v        # script regression tests
 ```
 
-Some image tools require Pillow; audio compression can use ffmpeg. See [scripts/README.md](marketplace/plugins/omni-game-studio/scripts/README.md), [templates/README.md](marketplace/plugins/omni-game-studio/templates/README.md), and [OPTIMIZATION.md](OPTIMIZATION.md) for more detail.
+`validate_repo.py` is dependency-free and checks what breaks marketplace installs: JSON manifests resolving to real plugin directories, `plugin.json` required fields and semver, view assets that exist, `SKILL.md` frontmatter names matching their directories, dangling `references/` paths, subagent TOML fields, and accidentally committed API keys. `skill_lint.py` scores each skill as `PASS` / `WARN` / `FAIL` / `NOT ASSESSED` instead of pretending an unassessed skill passed.
+
+Tagging `vX.Y.Z` runs the release workflow: it re-runs all checks, refuses to publish when the tag disagrees with `plugin.json`, and attaches a `omni-game-studio-X.Y.Z.zip` plus `SHA256SUMS.txt` to the GitHub release.
 
 ### Limits and verification
 
@@ -150,7 +161,7 @@ Contributions are welcome across engine skills, documentation, production script
 
 1. Search [existing Issues](https://github.com/NextAgentX/omni-game-studio-codex/issues) or open one with the engine/version, target platform, expected behavior, and reproduction steps.
 2. Fork the repository and keep each pull request focused. Explain the problem, the change, and any engine/platform compatibility impact.
-3. Run the plugin test command above for script changes. For skill or documentation changes, check linked paths, stage definitions, and engine ownership.
+3. Run `python tools/validate_repo.py` and the plugin test command above for script changes. For skill or documentation changes, run `python scripts/skill_lint.py` to catch broken references and frontmatter drift.
 4. In your pull request, list the checks you actually ran and anything still unverified. For generated media, include its source and license information.
 
 ### Support the project
@@ -177,6 +188,9 @@ If this project is useful to you, please [star it on GitHub](https://github.com/
 ```text
 marketplace/   Codex plugin marketplace and Omni Game Studio plugin
 subagents/     Optional specialist role profiles
+tools/         Repository validation (used by CI and by hand)
+.github/       CI workflows, release workflow, issue and pull request templates
+requirements-ci.txt  Test-only dependencies (Pillow)
 donate-alipay.jpg / donate-wechat.png  Project-support QR images
 INSTALL.md     Installation and AI-asset guide
 OPTIMIZATION.md  Version history

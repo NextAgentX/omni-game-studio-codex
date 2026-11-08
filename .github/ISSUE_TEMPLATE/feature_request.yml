@@ -1,0 +1,52 @@
+name: Feature request
+description: Propose a new skill, script, template, engine/platform coverage or workflow change.
+title: "[feature] "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or impossible today, and who hits it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Where it lands — new skill, existing skill, script, template, docs, CI.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - new skill
+        - change to an existing skill
+        - new or changed script
+        - template or starter project
+        - CI / validation tooling
+        - documentation only
+        - not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What you tried instead, including doing nothing.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: honesty
+    attributes:
+      label: Verification claims
+      description: This project refuses to claim unverified results.
+      options:
+        - label: The proposal states what can be verified automatically and what still needs a human or a real device.
+          required: true

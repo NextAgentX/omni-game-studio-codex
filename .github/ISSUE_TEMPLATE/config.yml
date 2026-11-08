@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and workflow discussion
+    url: https://github.com/NextAgentX/omni-game-studio-codex/discussions
+    about: Ask how to apply a skill to your project, or share what worked.
+  - name: Installation and AI asset guide
+    url: https://github.com/NextAgentX/omni-game-studio-codex/blob/main/INSTALL.md
+    about: Online install, upgrade and AI image/audio setup before filing a bug.

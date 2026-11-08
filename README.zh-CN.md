@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-[![GitHub stars](https://img.shields.io/github/stars/NextAgentX/omni-game-studio-codex?style=social)](https://github.com/NextAgentX/omni-game-studio-codex/stargazers) [![Issues](https://img.shields.io/github/issues/NextAgentX/omni-game-studio-codex)](https://github.com/NextAgentX/omni-game-studio-codex/issues)
+[![GitHub stars](https://img.shields.io/github/stars/NextAgentX/omni-game-studio-codex?style=social)](https://github.com/NextAgentX/omni-game-studio-codex/stargazers) [![Issues](https://img.shields.io/github/issues/NextAgentX/omni-game-studio-codex)](https://github.com/NextAgentX/omni-game-studio-codex/issues) [![CI](https://github.com/NextAgentX/omni-game-studio-codex/actions/workflows/ci.yml/badge.svg)](https://github.com/NextAgentX/omni-game-studio-codex/actions/workflows/ci.yml)
 
 **Omni Game Studio 是面向 Codex 的实用型游戏制作工具集。** 它把策划、工程、美术、音频、测试、发行等专业工作整理成可调用的技能、可选角色提示词、工程模板、文档模板和制作脚本，支持 **Cocos Creator、Unity 与 Godot**。
 
@@ -18,7 +18,7 @@ Omni Game Studio 为 Codex 提供这些分工明确的工作流，帮助把需�
 
 - **14 个技能：** 覆盖编排、设计、引擎工程、资源制作、QA、发行和运营。
 - **8 个可选角色：** Cocos、Unity、Godot、美术、音频、叙事、QA 和发行。
-- **12 个 Python 脚本：** 处理 AI 媒体适配、资源制作、manifest、构建、音频和流程状态。
+- **13 个 Python 脚本：** 处理 AI 媒体适配、资源制作、manifest、构建、运行留证、音频和流程状态。
 - **10 份文档模板：** 包含制作路线图、Sprint 复盘及 G1–G5 里程碑评审。
 - **3 个引擎模板：** Godot 4、Unity、Cocos Creator 3.x 小型起步工程。
 
@@ -104,19 +104,29 @@ python scripts/gen_ai_audio.py sfx --prompt "short bright pickup chime" --durati
 
 `scripts/` 包含：
 
-- `omni_state.py`：阶段文档状态和门禁。
+- `omni_state.py`：阶段文档状态与门禁、截图证据校验、会话检查点。
 - `gen_ai_image.py`、`gen_ai_audio.py`、`gen_music.py`、`gen_sfx.py`：AI 图片/音频适配及程序音频生成。
 - `process_art.py`、`split_sprite_sheet.py`、`pack_atlas.py`、`compress_audio.py`：资源处理。
-- `validate_assets.py`、`build_check.py`：资源和构建检查。
+- `validate_assets.py`、`build_check.py`：资源和构建检查；`--capture` 会把游戏跑起来并留下带哈希回执的截图。
 - `gen_placeholder_art.py`：只用于验证资源流程的占位图，不是正式美术。
+- `skill_lint.py`：技能文件自身的结构自测。
 
-运行各脚本的 `--help` 查看参数。插件开发目前使用以下回归命令：
+运行各脚本的 `--help` 查看参数。部分图片工具需要 Pillow，音频压缩可选使用 ffmpeg。更多细节见[脚本说明](marketplace/plugins/omni-game-studio/scripts/README.md)、[模板说明](marketplace/plugins/omni-game-studio/templates/README.md)和[版本记录](OPTIMIZATION.md)。
+
+### 仓库自检
+
+CI 校验的是仓库本身，不是你的游戏。以下三条命令本地与每次推送执行的是同一套：
 
 ```bash
-python -m unittest discover -s marketplace/plugins/omni-game-studio/tests -v
+python tools/validate_repo.py                  # 清单、插件清单、引用路径、脚本语法
+cd marketplace/plugins/omni-game-studio
+python scripts/skill_lint.py                   # SKILL.md 结构与引用解析
+python -m unittest discover -s tests -v        # 脚本回归测试
 ```
 
-部分图片工具需要 Pillow，音频压缩可选使用 ffmpeg。更多细节见[脚本说明](marketplace/plugins/omni-game-studio/scripts/README.md)、[模板说明](marketplace/plugins/omni-game-studio/templates/README.md)和[版本记录](OPTIMIZATION.md)。
+`validate_repo.py` 无第三方依赖，专查会让市场安装失败的问题：市场清单能否解析到真实插件目录、`plugin.json` 必填字段与 semver、界面图资源是否存在、`SKILL.md` frontmatter 的 `name` 是否与目录一致、`references/` 死链、子代理 TOML 字段，以及误提交的 API 密钥。`skill_lint.py` 按 `PASS` / `WARN` / `FAIL` / `NOT ASSESSED` 四值打分，没评估就说没评估，不假装通过。
+
+打 `vX.Y.Z` 标签会触发发布流程：重跑全部检查，标签与 `plugin.json` 版本不一致时拒绝发布，并把 `omni-game-studio-X.Y.Z.zip` 与 `SHA256SUMS.txt` 附加到 GitHub Release。
 
 ### 能力边界与验证
 
@@ -132,7 +142,7 @@ python -m unittest discover -s marketplace/plugins/omni-game-studio/tests -v
 
 1. 先搜索[现有 Issues](https://github.com/NextAgentX/omni-game-studio-codex/issues)，或提交新问题并说明引擎/版本、目标平台、预期行为和复现步骤。
 2. Fork 仓库并让每个 Pull Request 聚焦一个主题，写清问题、改动和引擎/平台兼容影响。
-3. 脚本改动运行上述插件测试命令；技能和文档改动检查链接路径、阶段定义和引擎职责。
+3. 脚本改动运行 `python tools/validate_repo.py` 和上述插件测试命令；技能和文档改动运行 `python scripts/skill_lint.py`，检查引用死链与 frontmatter 漂移。
 4. Pull Request 中列出实际执行过的检查和仍未验证的部分。若提交 AI 生成资源，请注明来源与授权信息。
 
 ### 支持项目
@@ -159,6 +169,9 @@ python -m unittest discover -s marketplace/plugins/omni-game-studio/tests -v
 ```text
 marketplace/   Codex 插件市场和 Omni Game Studio 插件
 subagents/     可选的专业角色配置
+tools/         仓库校验脚本（CI 与手动执行共用）
+.github/       CI 流程、发布流程、Issue 与 PR 模板
+requirements-ci.txt  仅测试用的依赖（Pillow）
 donate-alipay.jpg / donate-wechat.png  项目支持二维码
 INSTALL.md     安装和 AI 资源指南
 OPTIMIZATION.md 版本更新记录

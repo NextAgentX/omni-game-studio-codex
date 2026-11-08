@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONIOENCODING: utf-8
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  repo:
+    name: Repository validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate manifests, plugin manifest, links and scripts
+        run: python tools/validate_repo.py
+
+  skills:
+    name: Skill structure lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Lint every SKILL.md
+        working-directory: marketplace/plugins/omni-game-studio
+        run: python scripts/skill_lint.py
+
+  tests:
+    name: Tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-ci.txt
+      - name: Run regression tests
+        working-directory: marketplace/plugins/omni-game-studio
+        run: python -m unittest discover -s tests -v
+
+  gate:
+    name: CI gate
+    if: always()
+    needs: [repo, skills, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail when any upstream job failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "one or more checks failed"
+          exit 1
+      - name: All checks passed
+        run: echo "repository validation, skill lint and tests all passed"
