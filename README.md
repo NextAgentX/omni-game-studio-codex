@@ -75,7 +75,7 @@ The seven document gates (`brief`, `gdd`, `tech`, `art`, `audio`, `qa`, and `rel
 
 #### Install
 
-Clone the repository, then follow [INSTALL.md](INSTALL.md) to register the `marketplace/` directory and install `omni-game-studio` from the `agentx-plugins` marketplace. The guide includes Windows and Unix-like shell examples, optional specialist profiles, media-generation setup, and the distinction between session tools and API credentials.
+Clone the repository, then follow [INSTALL.md](INSTALL.md) to register the `marketplace/` directory and install `omni-game-studio` from the `omni-game-studio-plugins` marketplace. The guide includes Windows and Unix-like shell examples, optional specialist profiles, media-generation setup, and the distinction between session tools and API credentials.
 
 #### Use it in a game project
 

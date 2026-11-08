@@ -57,7 +57,7 @@ Omni Game Studio 为 Codex 提供这些分工明确的工作流，帮助把需�
 
 #### 安装
 
-先克隆仓库，再按 [INSTALL.md](INSTALL.md) 注册 `marketplace/` 并从 `agentx-plugins` 市场安装 `omni-game-studio`。安装指南包含 Windows 和类 Unix 命令、可选专业角色、媒体生成配置，以及会话工具与 API 凭证的区别。
+先克隆仓库，再按 [INSTALL.md](INSTALL.md) 注册 `marketplace/` 并从 `omni-game-studio-plugins` 市场安装 `omni-game-studio`。安装指南包含 Windows 和类 Unix 命令、可选专业角色、媒体生成配置，以及会话工具与 API 凭证的区别。
 
 #### 在游戏项目中使用
 

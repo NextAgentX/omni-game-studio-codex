@@ -1,7 +1,7 @@
 {
-  "name": "agentx-plugins",
+  "name": "omni-game-studio-plugins",
   "interface": {
-    "displayName": "AgentX Plugins"
+    "displayName": "Omni Game Studio Plugins"
   },
   "plugins": [
     {

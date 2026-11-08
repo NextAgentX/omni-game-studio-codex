@@ -1,4 +1,9 @@
-# v3.4.2 README 国际化与项目介绍
+# v3.4.3 Marketplace 命名统一
+
+- 将本地插件市场 ID 统一为 `omni-game-studio-plugins`，并更新安装命令、README 和缓存路径示例。
+- 将市场显示名改为 Omni Game Studio Plugins；AgentX 开发者署名保持不变。
+
+## v3.4.2 README 国际化与项目介绍
 
 - 重写仓库根 README，以英文作为默认显示语言并提供完整简体中文对应内容。
 - 详细说明本项目的技能组成、引擎支持、制作生命周期、AI 图片/动效/音频流程、模板、脚本、验证边界和贡献方式。
