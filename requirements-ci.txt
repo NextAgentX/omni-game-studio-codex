@@ -1,3 +1,6 @@
 # Test-only dependencies for CI. The shipped scripts stay dependency-free
 # except for Pillow (image processing) and ffmpeg (audio, optional).
-pillow>=10.0
+# Pillow 13 requires Python >=3.11, so the legacy 3.9/3.10 matrix rows keep the
+# last compatible line instead of failing at install time.
+pillow>=13.0.0; python_version >= "3.11"
+pillow>=10.0; python_version < "3.11"
