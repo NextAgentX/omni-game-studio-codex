@@ -1,6 +1,6 @@
 ---
 name: game-animation-production
-description: Create or integrate game animation and VFX from AI-generated sprite sheets, image sequences, or available video-generation tools; validate frames, timing, and engine integration.
+description: Create or integrate game animation and VFX from AI-generated sprite sheets, image sequences, or available video-generation tools; validate frames, timing, and engine integration. Use when a game needs character, UI or VFX animation, when turning a sprite sheet or GIF into engine frames, or when animation timing and frame consistency look wrong.
 ---
 
 # AI 游戏动效与动画

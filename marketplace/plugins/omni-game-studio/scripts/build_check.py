@@ -1,20 +1,29 @@
 #!/usr/bin/env python3
-"""build_check.py — 构建检查与验证
+"""build_check.py — 构建检查、产物校验与运行留证
 
 用法:
-  python build_check.py --project .                       # 自动识别引擎，打印构建命令（不执行）
+  python build_check.py --project .                        # 自动识别引擎，打印构建命令（不执行）
   python build_check.py --project . --preset Web --out build/web --run
-  python build_check.py --project . --verify build/web    # 只校验已有产物
+  python build_check.py --project . --verify build/web     # 只校验已有产物
+  python build_check.py --project . --run --capture g2-slice   # 构建后启动并截图留证
+  python build_check.py --project . --capture-only quick-look   # 不构建，只跑起来看一眼
 
 支持: Godot 4 / Unity / Cocos Creator 3.x
-说明: 各引擎 CLI 参数随版本变化，执行前请核对官方文档；--run 失败会如实返回非零。
+说明:
+  - 各引擎 CLI 参数随版本变化，执行前请核对官方文档；--run 失败会如实返回非零退出码。
+  - 解析通过不等于跑起来；跑起来不等于看得对。--capture 是唯一产出"我看过"这一步的路径。
+  - 截图证据落在 docs/qa/evidence/<名字>/，同时写 receipt.json 记录所覆盖文件的 sha256。
+    之后任何一次改动都会让这份证据显示为过期，而不是"通过"。
 """
 
 import argparse
+import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 GODOT_BINS = ["godot", "godot4", "Godot"]
@@ -26,6 +35,15 @@ COCOS_HINTS = [
     r"C:\ProgramData\cocos\editors",
     "/Applications/Cocos/Creator",
 ]
+
+EVIDENCE_ROOT = "docs/qa/evidence"
+DEFAULT_FRAMES = 90          # 让引擎真的渲染若干帧再截图，60 是下限
+DEFAULT_RESOLUTION = "1280x720"
+MAX_HASH_BYTES = 20 * 1024 * 1024
+
+
+def now():
+    return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
 
 
 def detect(project: Path):
@@ -76,6 +94,7 @@ def cmd_godot(project, preset, out):
     if p not in presets:
         return None, [f"预设 '{p}' 不存在。可用: {', '.join(presets)}"]
     target = out or f"build/{p}"
+    # 构建可以且应当 headless；截图阶段绝不能用（那是为了跳过渲染而存在的开关）。
     return [binary, "--headless", "--export-release", p, str(target)], []
 
 
@@ -118,14 +137,250 @@ def verify(path: Path):
     ]
 
 
+# ---------------------------------------------------------------------------
+# 运行留证
+# ---------------------------------------------------------------------------
+
+def sha256_file(path: Path):
+    """返回 (hash, bytes)，跳过大文件（返回 None）。"""
+    try:
+        size = path.stat().st_size
+        if size > MAX_HASH_BYTES:
+            return None, size
+        h = hashlib.sha256()
+        with path.open("rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest(), size
+    except OSError:
+        return None, 0
+
+
+def image_size(path: Path):
+    """Pillow 存在时读取截图尺寸；不存在就返回 None，不因此判定失败。"""
+    try:
+        from PIL import Image
+    except Exception:
+        return None
+    try:
+        with Image.open(path) as im:
+            return list(im.size)
+    except Exception:
+        return None
+
+
+def _under(path: Path, parent: Path) -> bool:
+    """path 是否在 parent 之下（Py3.9 兼容写法）。"""
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def git_changed_sources(project: Path, exclude_dirs):
+    """本份证据覆盖哪些文件：git 里已修改/未跟踪的文件。git 不可用则返回空并说明。"""
+    try:
+        out = subprocess.run(["git", "status", "--porcelain"], cwd=str(project),
+                             capture_output=True, text=True, errors="replace", timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return [], "git 不可用，证据未绑定任何源文件（无法判断新鲜度）"
+    if out.returncode != 0:
+        return [], "当前目录不是 git 仓库，证据未绑定任何源文件"
+
+    sources = []
+    for line in out.stdout.splitlines():
+        raw = line[3:] if len(line) > 3 else ""
+        if " -> " in raw:
+            raw = raw.split(" -> ", 1)[1]
+        raw = raw.strip().strip('"')
+        if not raw:
+            continue
+        p = (project / raw).resolve()
+        if not p.exists() or not p.is_file():
+            continue
+        if ".git" in p.parts:
+            continue
+        if any(_under(p, Path(d).resolve()) for d in exclude_dirs if d):
+            continue
+        digest, size = sha256_file(p)
+        sources.append({"path": raw.replace("\\", "/"), "sha256": digest, "bytes": size})
+    return sources, ""
+
+
+def capture_command(engine, project, evidence_dir, scene, frames, capture_cmd):
+    """返回 (cmd, notes, verdict)。
+
+    verdict:
+      READY        有可直接执行的启动+截图命令
+      NOT_ASSESSED 该引擎没有内置的无人值守截图能力，且用户没给命令
+    """
+    if capture_cmd:
+        return capture_cmd, ["使用 --capture-cmd 提供的命令；约定它把截图写进证据目录。"], "READY"
+
+    if engine == "godot":
+        binary = find_godot() or "godot"
+        movie = str((evidence_dir / "shot.png").resolve())
+        cmd = [binary, "--path", str(project), "--windowed",
+               "--resolution", DEFAULT_RESOLUTION]
+        if scene:
+            cmd.append(scene)
+        # --write-movie 传 .png 时写的是图片序列（shot00000000.png 起）。
+        # 绝不能用 --headless：它跳过渲染，截出来会是空白。
+        cmd += ["--write-movie", movie, "--quit-after", str(frames)]
+        return cmd, [], "READY"
+
+    if engine == "unity":
+        return None, [
+            "Unity 没有可用的内置无人值守截图 CLI，需要一层引导脚本：",
+            "  1. 在项目里加一个 Bootstrap MonoBehaviour，启动后等若干帧再调 "
+            "ScreenCapture.CaptureScreenshot(<绝对路径>)，然后 Application.Quit()；",
+            "  2. 构建播放器后运行：",
+            "     <Player>.exe -screen-width 1280 -screen-height 720 -screen-fullscreen 0 "
+            "-scene <Name> --capture-shot <证据目录>/shot.png",
+            "  3. 或直接把上面这条命令用 --capture-cmd 传进来。",
+            "不能用的开关：-batchmode、-nographics（它们会跳过渲染）。",
+        ], "NOT_ASSESSED"
+
+    if engine == "cocos":
+        return None, [
+            "Cocos Creator 没有内置的无人值守截图 CLI（预览跑在浏览器/模拟器里）。",
+            "两条可行路径：",
+            "  a. 构建 web-mobile，用无头浏览器截图：",
+            '     npx playwright screenshot --viewport-size=1280,720 <预览地址> <证据目录>/shot.png',
+            "  b. 小游戏用对应开发者工具的真机预览手动截图，再把文件放进证据目录。",
+            "把命令用 --capture-cmd 传进来即可自动留证；否则本步记为 NOT ASSESSED。",
+        ], "NOT_ASSESSED"
+
+    return None, [f"未知引擎: {engine}"], "NOT_ASSESSED"
+
+
+def pick_screenshot(evidence_dir: Path):
+    """取证据目录里最新的一张 png，并把 Godot 的帧序列收敛成 shot.png。
+
+    Godot 的 --write-movie 会顺带写出同名 .wav（录制的音频），那不是画面证据，删掉。
+    """
+    pngs = sorted(evidence_dir.glob("*.png"), key=lambda p: p.stat().st_mtime)
+    if not pngs:
+        return None
+    for wav in evidence_dir.glob("*.wav"):
+        try:
+            wav.unlink()
+        except OSError:
+            pass
+    frames = [p for p in pngs if p.name.startswith("shot") and p.name.endswith(".png")]
+    newest = pngs[-1]
+    if len(frames) > 1:
+        target = evidence_dir / "shot.png"
+        if newest != target:
+            newest.replace(target)
+        for f in frames:
+            if f != target and f.exists():
+                f.unlink()
+        return target
+    return newest
+
+
+def fmt_size(size):
+    """image_size 返回 (w, h)；统一成 宽x高 以便阅读。"""
+    if not size or len(size) < 2:
+        return ""
+    return f"{size[0]}x{size[1]}"
+
+
+def run_capture(project: Path, engine, name, scene=None, frames=DEFAULT_FRAMES,
+                capture_cmd=None, dry_run=False):
+    """跑起来、截图、写回执。返回 (verdict, messages)。"""
+    evidence_dir = project / EVIDENCE_ROOT / name
+    cmd, notes, state = capture_command(engine, project, evidence_dir, scene, frames, capture_cmd)
+    msgs = list(notes)
+
+    if state != "READY":
+        msgs.append("VERDICT: NOT ASSESSED —— 这一步没有产出任何证据，不能当作已看过的画面。")
+        return "NOT_ASSESSED", msgs
+
+    shown = cmd if isinstance(cmd, str) else " ".join(cmd)
+    msgs.append("启动命令: " + shown)
+    if dry_run:
+        msgs.append("（未执行。去掉 --dry-run 才真正启动并截图）")
+        return "READY", msgs
+
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    started = now()
+    try:
+        proc = subprocess.run(cmd, cwd=str(project), shell=isinstance(cmd, str),
+                              timeout=300, capture_output=True, text=True,
+                              errors="replace")
+        rc = proc.returncode
+        tail = (proc.stdout or "")[-2000:] + (proc.stderr or "")[-2000:]
+    except FileNotFoundError:
+        msgs.append(f"FAIL: 可执行文件未找到: {cmd[0] if isinstance(cmd, list) else cmd}")
+        msgs.append("VERDICT: NOT ASSESSED —— 没有启动起来，就没有画面可看。")
+        return "NOT_ASSESSED", msgs
+    except subprocess.TimeoutExpired:
+        rc = -9
+        tail = "启动超时（300s 未退出）"
+        msgs.append("FAIL: " + tail)
+
+    shot = pick_screenshot(evidence_dir)
+    sources, src_note = git_changed_sources(project, [evidence_dir])
+    if src_note:
+        msgs.append(src_note)
+
+    receipt = {
+        "schema": 1,
+        "at": started,
+        "engine": engine,
+        "evidence_dir": str(evidence_dir.relative_to(project)).replace("\\", "/"),
+        "command": cmd if isinstance(cmd, str) else cmd,
+        "exit_code": rc,
+        "output_tail": tail.strip()[-1200:],
+        "screenshot": None,
+        "sources": sources,
+    }
+
+    if shot:
+        digest, size = sha256_file(shot)
+        dims = image_size(shot)
+        receipt["screenshot"] = {
+            "path": shot.name, "sha256": digest, "bytes": size,
+            "size": dims,
+        }
+        msgs.append(f"截图: {EVIDENCE_ROOT}/{name}/{shot.name} "
+                    f"({size/1024:.1f} KB {fmt_size(dims)})".replace(" )", ")"))
+        msgs.append("尺寸以项目自己的窗口设置为准；--resolution 只是请求，游戏是竖屏就截竖屏。")
+    else:
+        msgs.append("FAIL: 证据目录里没有出现任何 png，画面未被捕获。")
+
+    (evidence_dir / "receipt.json").write_text(
+        json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
+    msgs.append(f"回执: {EVIDENCE_ROOT}/{name}/receipt.json（绑定 {len(sources)} 个改动文件）")
+
+    if not shot:
+        msgs.append("VERDICT: NOT ASSESSED —— 没有截图，就不算看过。")
+        return "NOT_ASSESSED", msgs
+    if rc != 0:
+        msgs.append(f"注意: 进程退出码 {rc}，但已拿到画面。画面是否为预期仍需人/代理判读。")
+    msgs.append("VERDICT: CAPTURED —— 现在去看这张图，再和验收标准逐条对。")
+    return "CAPTURED", msgs
+
+
 def main():
-    ap = argparse.ArgumentParser(description="构建检查与验证")
+    ap = argparse.ArgumentParser(description="构建检查、产物校验与运行留证")
     ap.add_argument("--project", default=".")
     ap.add_argument("--engine", choices=["auto", "godot", "unity", "cocos"], default="auto")
     ap.add_argument("--preset")
     ap.add_argument("--out")
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--verify", help="只校验已有产物目录")
+    ap.add_argument("--capture", metavar="NAME",
+                    help="构建后启动引擎并截图留证，证据落在 docs/qa/evidence/NAME/")
+    ap.add_argument("--capture-only", metavar="NAME", help="跳过构建，只启动并截图")
+    ap.add_argument("--scene", help="启动直接进入的场景/地图，避免靠菜单点进去")
+    ap.add_argument("--frames", type=int, default=DEFAULT_FRAMES,
+                    help=f"截图前让引擎渲染的帧数（默认 {DEFAULT_FRAMES}）")
+    ap.add_argument("--capture-cmd", help="自定义启动+截图命令（Unity/Cocos 需要）")
+    ap.add_argument("--dry-run", action="store_true", help="只打印命令，不执行")
     args = ap.parse_args()
 
     project = Path(args.project).resolve()
@@ -145,6 +400,13 @@ def main():
         return 1
     print(f"引擎: {engine}   项目: {project}")
 
+    if args.capture_only:
+        verdict, msgs = run_capture(project, engine, args.capture_only, args.scene,
+                                    args.frames, args.capture_cmd, args.dry_run)
+        for m in msgs:
+            print("  · " + m)
+        return {"CAPTURED": 0, "READY": 0}.get(verdict, 2)
+
     if engine == "godot":
         cmd, notes = cmd_godot(project, args.preset, args.out)
     elif engine == "unity":
@@ -162,6 +424,8 @@ def main():
     if not args.run:
         if engine == "godot" and not cmd:
             return 1
+        if args.capture:
+            print("\n（--capture 需要配合 --run，或使用 --capture-only）")
         print("\n（未执行。加 --run 实际构建）")
         return 0
 
@@ -186,7 +450,18 @@ def main():
     ok, msgs = verify((project / out_dir) if not out_dir.is_absolute() else out_dir)
     for m in msgs:
         print(("  OK  " if ok else "  FAIL ") + m)
-    return 0 if ok else 1
+    if not ok:
+        return 1
+
+    if args.capture:
+        print("\n运行留证…")
+        verdict, cmsgs = run_capture(project, engine, args.capture, args.scene,
+                                     args.frames, args.capture_cmd, args.dry_run)
+        for m in cmsgs:
+            print("  · " + m)
+        if verdict == "NOT_ASSESSED":
+            return 2
+    return 0
 
 
 if __name__ == "__main__":

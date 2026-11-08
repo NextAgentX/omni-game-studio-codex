@@ -50,4 +50,4 @@ description: "Plan and execute multiplatform game release — WeChat and Douyin 
 - PC 与主机分发看引擎生态：Unity / Godot 在 Steam 更成熟，Cocos 以移动与小游戏为主
 - 版号与资质是硬门槛：涉及国内付费或内购必须前置提示
 - 不替工程师改构建，不替制作人定商业策略
-- 详细清单与矩阵见 `multiplatform-release` 技能的 `references/release-checklist.md` 与 `references/platform-matrix.md`
+- 详细清单与矩阵见 `skills/multiplatform-release/references/release-checklist.md` 与 `skills/multiplatform-release/references/platform-matrix.md`

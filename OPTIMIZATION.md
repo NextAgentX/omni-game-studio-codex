@@ -1,3 +1,21 @@
+# 未发布：证据闭环、会话检查点与技能自测
+
+- `build_check.py` 新增 `--capture` / `--capture-only`：构建后无人值守启动引擎并截图，证据落在 `docs/qa/evidence/<名字>/`，同目录 `receipt.json` 记录所覆盖改动文件的 sha256。Godot 用 `--write-movie --quit-after` 原生支持；Unity 与 Cocos 无内置无人值守截图，返回 `NOT ASSESSED` 并给可用命令，不假装成功。
+- `omni_state.py` 新增 `evidence list|check`：按 sha256 判断证据是否仍代表当前代码，被覆盖文件改过即判定过期；`advance` 离开 `qa` 阶段时默认校验证据，`--no-evidence` 可显式跳过。
+- `omni_state.py` 新增 `checkpoint` 与会话检查点 `.omni/active.md`：`STATUS` 供工具读、`CHECKPOINT` 覆盖写、叙述区追加，超过 200 行自动归档到 `.omni/session-logs/`。两个编排技能在开工前先读它。
+- 编排与流水线技能新增两条铁律：产物优先于叙述（声称写了文件就校验路径存在，缺失即阶段失败）、qa 之后必须有截图（`NOT ASSESSED` 不是通过）。
+- 新增 `scripts/skill_lint.py` 与 `tests/test_skill_lint.py`：7 条结构检查、四值判分，发版前跑一次；首跑即查出两个技能缺触发条件、两处跨技能引用会扑空，均已修。
+- 新增 `templates/active.md`；QA 文档模板增加「截图证据」小节。
+
+# 未发布：CI 门禁与仓库自检
+
+- 新增 GitHub Actions CI（`.github/workflows/ci.yml`）：仓库清单校验、技能结构检查、Python 3.9 / 3.12 / 3.13 三版本回归测试，另设 `CI gate` 汇总状态，供分支保护只勾一个检查项。
+- 新增 `tools/validate_repo.py`（零第三方依赖）：校验市场清单能解析到真实插件目录、`plugin.json` 必填字段与 semver、界面图资源存在性、`SKILL.md` frontmatter 与目录一致、`references/` 死链、子代理 TOML 字段、脚本语法及误提交的 API 密钥。
+- 新增 `v*.*.*` 标签触发的发布流程（`.github/workflows/release.yml`）：先重跑全部检查，标签与 `plugin.json` 版本不一致即失败；通过后产出 `omni-game-studio-<版本>.zip` 与 `SHA256SUMS.txt` 并附到 Release。
+- 新增 `requirements-ci.txt`（仅测试依赖 Pillow）、Dependabot 配置、Issue 表单（Bug / 功能请求）与 PR 模板。
+- 双语 README 补充 CI 徽章、仓库自检命令与目录说明。
+- 边界：CI 只验证仓库结构、引用完整性与脚本回归，不构建游戏、不跑真机、不评估技能内容质量；跨技能引用仍由 `skill_lint.py` 记为 WARN，不强制失败。
+
 # v3.5.0 GitHub 在线安装与升级
 
 - 在仓库根目录增加 `.agents/plugins/marketplace.json`，使 Codex 可通过 GitHub 仓库根路径发现嵌套的 `marketplace/plugins/omni-game-studio` 插件。

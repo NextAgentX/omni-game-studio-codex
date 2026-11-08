@@ -62,7 +62,10 @@ mkdir -p docs assets/art assets/audio doc/temp
 cp <plugin>/templates/docs/*.md docs/
 cp <plugin>/templates/assets-manifest.json assets/manifest.json
 python scripts/omni_state.py init --root . --engine godot --platforms web,android
+python scripts/omni_state.py checkpoint --root . --task "立项" --next "写 brief"
 ```
+
+开工前先读 `.omni/active.md`（若有）：那是上个会话留下的当前任务与卡点，压缩或换会话后比对话可靠。
 
 三个模板的成熟度不同，**必须如实告诉用户**：
 
@@ -125,12 +128,18 @@ G2 通过后才按垂直切片的实际产能计划批量制作。填写 `docs/0
 
 ### 6. 测试与打磨（G4 / G5）
 
-派 `game-qa-engineer` 出测试计划。Alpha 后进入 Beta 内容锁定，默认停止新增功能；如确需加功能，记录对工期、测试范围和门禁的影响并重新评审。准备 Gold 前**必须真的跑一次构建**：
+派 `game-qa-engineer` 出测试计划。Alpha 后进入 Beta 内容锁定，默认停止新增功能；如确需加功能，记录对工期、测试范围和门禁的影响并重新评审。准备 Gold 前**必须真的跑一次构建**，并且**看一眼画面**：
 
 ```bash
-python scripts/build_check.py --project .            # 先看命令
-python scripts/build_check.py --project . --run      # 实际构建
+python scripts/build_check.py --project .                            # 先看命令
+python scripts/build_check.py --project . --run --capture g4-beta     # 构建 + 启动 + 截图
+python scripts/omni_state.py check --root . --stage qa --evidence     # 文档 + 证据一起校验
+python scripts/omni_state.py advance --root . --to release            # 无证据会被拦下
 ```
+
+截图落在 `docs/qa/evidence/<名字>/`，`receipt.json` 记录所覆盖文件的 sha256。之后任何一次改动都会让这份证据显示过期——过期的截图不算证据，重新截。
+
+解析通过不等于跑起来，跑起来不等于看得对：文字挤出色块、面板溢出、元素没出现，只有看图才发现。Unity 与 Cocos 没有内置的无人值守截图能力，脚本会如实返回 `NOT ASSESSED`；此时用 `--capture-cmd` 给命令，或明说"没看过画面"，**不许当成通过**。确实要先推进可用 `--no-evidence`，但交付时必须写明没看过。
 
 构建失败就把日志原样交给对应引擎工程师，不要自己猜。记录实际测试、平台兼容及候选包证据，邀请负责人评审后再确认 Gold / Release。文档 `advance` 不会自动通过 Alpha、Beta、Gold 或签署发布。
 
@@ -151,8 +160,8 @@ state.json 里的 stage + 门禁状态
 ## 已产出工件
 docs/ 与 assets/ 清单，标出仍是 placeholder 的数量
 
-## 构建状态
-build_check 的结果：成功 / 失败 / 未执行
+## 构建与证据
+build_check 的结果：成功 / 失败 / 未执行；有没有截图，截图覆盖哪些文件，是否已过期
 
 ## 未完成的真实缺口
 明确说清哪些还需要人做
@@ -167,6 +176,8 @@ build_check 的结果：成功 / 失败 / 未执行
 5. **数字带出处**：包体上限、引擎能力一律标版本与复核方式
 6. **每轮 Sprint 交付可玩构建**：任务完成数不能代替构建、测试和评审
 7. **门禁以评审证据为准**：`omni_state.py` 只检查文档标题及 TODO，不能自动验证玩法、构建、设备或发行审批
+8. **产物优先于叙述**：派出去的角色声称写了文件，就校验那个路径存在。不存在就是 PHASE FAILED——不推进、不总结为完成。一段流畅的"我将要…"不是证据，磁盘上的文件才是
+9. **qa 之后必须有截图**：没有 `docs/qa/evidence/` 里的可用截图，不许进 release；`advance` 会拦。`NOT ASSESSED` 不是通过
 
 ## 这套流水线做不到的
 

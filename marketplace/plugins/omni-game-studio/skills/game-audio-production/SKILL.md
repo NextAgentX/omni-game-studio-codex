@@ -1,6 +1,6 @@
 ---
 name: game-audio-production
-description: Generate and integrate game sound effects and music using available AI audio tools or the bundled ElevenLabs adapter; validate loops, formats, provenance, and engine playback.
+description: Generate and integrate game sound effects and music using available AI audio tools or the bundled ElevenLabs adapter; validate loops, formats, provenance, and engine playback. Use when a game needs real sound effects or BGM, when AI audio must be produced and registered, or when audio does not play on a target platform.
 ---
 
 # 游戏音效与音乐生成

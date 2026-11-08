@@ -24,11 +24,11 @@ description: Orchestrate a full game production pipeline across Cocos Creator, U
 | `game-qa-engineer` | 测试策略、兼容矩阵、性能验收、准入判定 | 需要测试计划、验收结论、上线准入判断时 |
 | `game-release-operator` | 七平台发布、包体与合规、审核过审、运营节奏 | 需要发布方案、平台规则卡、资质清单、排期时 |
 
-**配套参考库**：`multiplatform-release` 技能，内含 `references/engine-matrix.md`（三引擎与平台支持矩阵）、`platform-matrix.md`、`release-checklist.md`、`project-structure.md`。引擎未定时由你结合平台约束与矩阵做选型，确认后再调用对应引擎技能；涉及包体上限、合规红线、引擎能力的问题，先查参考库和官方文档，**不要凭记忆给数字**。
+**配套参考库**：`multiplatform-release` 技能，参考文件在 `skills/multiplatform-release/references/`：`engine-matrix.md`（三引擎与平台支持矩阵）、`platform-matrix.md`、`release-checklist.md`、`project-structure.md`。引擎未定时由你结合平台约束与矩阵做选型，确认后再调用对应引擎技能；涉及包体上限、合规红线、引擎能力的问题，先查参考库和官方文档，**不要凭记忆给数字**。
 
 **配套流水线**：`game-production-pipeline` 技能。当用户要"从想法一路做到能上线"时，走那条流水线（固定工件路径 + 阶段门禁 + 资源脚本 + 构建验证），不要只停在文档层。
 
-**生命周期**：完整项目按立项 → 预制作/垂直切片 → Sprint 量产 → Alpha/Beta/Gold 打磨 → 发布/运营跟进。可裁剪的 Sprint 和里程碑流程见 `game-production-pipeline/references/production-cycle.md`。现有七阶段文档只是子门禁；真实构建、测试和里程碑签署都要有实际证据。
+**生命周期**：完整项目按立项 → 预制作/垂直切片 → Sprint 量产 → Alpha/Beta/Gold 打磨 → 发布/运营跟进。可裁剪的 Sprint 和里程碑流程见 `skills/game-production-pipeline/references/production-cycle.md`。现有七阶段文档只是子门禁；真实构建、测试和里程碑签署都要有实际证据。
 
 **AI 素材**：图片使用 `game-art-production`；精灵表与动效使用 `game-animation-production`；AI 音效及音乐使用 `game-audio-production`。优先检查并调用当前会话真实可用的生成工具；不可用时说明依赖与未完成内容。
 
@@ -41,8 +41,31 @@ description: Orchestrate a full game production pipeline across Cocos Creator, U
 4. **写操作串行，只读分析才并行**：多个 subagent 同时改同一个仓库会产生写冲突。需要并行时，只并行只读分析（如剖析 + 资源清点），代码与文档改动由你按顺序派单。
 5. **数字必须带版本与复核入口**：平台包体上限、引擎能力结论，一律标注"以官方最新文档为准"和核实方式。
 6. **不确定就说不确定**：引擎版本差异很大，跨版本套用结论是事故来源。
+7. **产物优先于叙述**：任何阶段或子代理声称写了文件，就校验那个路径真的存在。不存在就是 PHASE FAILED——不推进阶段、不总结为"已完成"、不进入下一步。返回文字读起来再顺，也不是证据。
+
+## 留证：说"我看过"之前先有截图
+
+改到玩家可见的东西，必须把游戏启动起来看一眼，截图留在 `docs/qa/evidence/<名字>/`：
+
+```bash
+python scripts/build_check.py --project . --run --capture g2-slice    # 构建 + 启动 + 截图
+python scripts/build_check.py --project . --capture-only quick-look   # 不构建，只跑起来看一眼
+python scripts/omni_state.py evidence check --root .                  # 这份证据还代表当前代码吗
+```
+
+解析通过不等于跑起来，跑起来不等于看得对——文字挤出色块、面板溢出、元素没出现，只有看图才发现。`receipt.json` 绑定改动文件的 sha256：之后改了任何一个被绑定的文件，这份证据就显示过期，那时它不再是证据，要重新截。
+
+Unity 与 Cocos 没有内置的无人值守截图能力。脚本会如实返回 `NOT ASSESSED`，不会假装成功：要么用 `--capture-cmd` 把自定义命令传进来，要么明说"没看过画面"，**不许当成通过**。
+
+关键节点之后写检查点，让下一个会话能接着干（尤其在被压缩之前）：
+
+```bash
+python scripts/omni_state.py checkpoint --root . --task "垂直切片" --next "接入口手感" --blocked "无"
+```
 
 ## Phase 0：立项澄清（你自己做，不派单）
+
+**先接上下文**：`.omni/active.md` 存在就先读它（`python scripts/omni_state.py checkpoint --root . --show`）。里面有上个会话留下的当前任务、下一步和卡点；上下文被压缩或换了会话之后，这个文件比对话更可靠。没有这个文件说明是新项目，直接从下面五问开始。
 
 按任务需要确认五个变量；可从现有项目推断的先自行检查，只有影响当前工作且无法推断时才询问：
 
@@ -61,7 +84,7 @@ Phase 1（串行）
   game-release-operator → 平台约束卡（各目标平台包体上限、审核要求、资质前置）
         ↓ 这是选型的硬边界
 Phase 2（串行）
-  你读取 multiplatform-release/references/engine-matrix.md，按平台支持 30% / 包体性能 25% / 团队技能 20% / 生态 SDK 15% / 授权成本 10% 对 Cocos、Unity、Godot 做矩阵比较
+  你读取 `skills/multiplatform-release/references/engine-matrix.md`，按平台支持 30% / 包体性能 25% / 团队技能 20% / 生态 SDK 15% / 授权成本 10% 对 Cocos、Unity、Godot 做矩阵比较
   可用时分别请 cocos-engineer、unity-engineer、godot-engineer 只读评估各自引擎的适配条件与风险
         汇总时标明证据、版本与「结论会反转的条件」
         ↓
