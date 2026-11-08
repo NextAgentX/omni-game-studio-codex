@@ -1,6 +1,6 @@
 {
   "name": "omni-game-studio",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "description": "Game production skills for Cocos Creator, Unity and Godot with concept, vertical slice, sprint, alpha/beta/gold, release and live-ops workflows plus AI image, animation, sound and music guidance.",
   "author": {
     "name": "AgentX"
