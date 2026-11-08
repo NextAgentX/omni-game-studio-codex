@@ -1,0 +1,10 @@
+{
+  "name": "omni-game-demo",
+  "uuid": "0f2c9b1e-7a44-4c8e-9a10-5d3b6c7e8f01",
+  "creator": {
+    "version": "3.8.6"
+  },
+  "version": "1.0.0",
+  "type": "2d",
+  "dependencies": {}
+}

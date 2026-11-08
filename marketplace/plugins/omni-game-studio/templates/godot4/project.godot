@@ -1,0 +1,22 @@
+; Godot 4 最小可运行工程模板（Omni Game Studio）
+; 打开方式：Godot 4.x → Import → 选择本目录的 project.godot
+; 若提示版本不一致，允许编辑器升级工程即可。
+
+config_version=5
+
+[application]
+
+config/name="OmniGameDemo"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

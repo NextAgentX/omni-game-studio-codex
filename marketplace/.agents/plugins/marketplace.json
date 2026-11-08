@@ -1,0 +1,20 @@
+{
+  "name": "jackey-plugins",
+  "interface": {
+    "displayName": "Jackey Plugins"
+  },
+  "plugins": [
+    {
+      "name": "omni-game-studio",
+      "source": {
+        "source": "local",
+        "path": "./plugins/omni-game-studio"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    }
+  ]
+}

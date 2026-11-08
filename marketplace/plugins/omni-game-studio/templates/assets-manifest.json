@@ -1,0 +1,69 @@
+{
+  "version": 2,
+  "note": "资源清单。tier=draft 表示未完成（占位或待替换），tier=final 才能进发布。每条必须写 source 与 license 作为授权台账；AI 生成素材必须标 ai_generated=true 并写 model。用 validate_assets.py --final 做发布前终检。",
+  "entries": [
+    {
+      "path": "assets/art/ui/ui_btn_primary.png",
+      "kind": "ui",
+      "tier": "draft",
+      "size": [256, 64],
+      "size_str": "256x64",
+      "nine_slice": 24,
+      "source": "ai",
+      "ai_generated": true,
+      "model": "<gpt-image / other>",
+      "license": "AI-generated, commercially cleared under <service> terms",
+      "commercial_ok": true,
+      "note": "主按钮，三态"
+    },
+    {
+      "path": "assets/art/sprites/player.png",
+      "kind": "sprite",
+      "tier": "draft",
+      "size": [128, 128],
+      "size_str": "128x128",
+      "source": "ai",
+      "ai_generated": true,
+      "model": "<gpt-image / other>",
+      "license": "AI-generated, commercially cleared under <service> terms",
+      "commercial_ok": true,
+      "note": "主角正面"
+    },
+    {
+      "path": "assets/art/sprites/coin.png",
+      "kind": "sprite",
+      "tier": "draft",
+      "size": [64, 64],
+      "size_str": "64x64",
+      "source": "self",
+      "ai_generated": false,
+      "license": "generated in-house, MIT",
+      "commercial_ok": true,
+      "note": "金币"
+    },
+    {
+      "path": "assets/audio/bgm_main.wav",
+      "kind": "audio",
+      "tier": "draft",
+      "duration_sec": 29.1,
+      "loop": true,
+      "source": "self",
+      "ai_generated": false,
+      "license": "generated in-house (chiptune synth), MIT",
+      "commercial_ok": true,
+      "note": "主菜单 BGM，无缝循环"
+    },
+    {
+      "path": "assets/audio/sfx_hit.wav",
+      "kind": "audio",
+      "tier": "draft",
+      "duration_sec": 0.14,
+      "loop": false,
+      "source": "self",
+      "ai_generated": false,
+      "license": "generated in-house, MIT",
+      "commercial_ok": true,
+      "note": "命中音效"
+    }
+  ]
+}

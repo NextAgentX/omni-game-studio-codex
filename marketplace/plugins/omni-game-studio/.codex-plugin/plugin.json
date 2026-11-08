@@ -1,0 +1,53 @@
+{
+  "name": "omni-game-studio",
+  "version": "3.4.0",
+  "description": "Game production skills for Cocos Creator, Unity and Godot with concept, vertical slice, sprint, alpha/beta/gold, release and live-ops workflows plus AI image, animation, sound and music guidance.",
+  "author": {
+    "name": "JackeyYe"
+  },
+  "license": "MIT",
+  "keywords": [
+    "game development",
+    "game design",
+    "gdd",
+    "production pipeline",
+    "cocos creator",
+    "unity",
+    "godot",
+    "mini game",
+    "wechat mini game",
+    "douyin mini game",
+    "harmonyos",
+    "multiplatform",
+    "engine selection",
+    "game art",
+    "game audio",
+    "bgm",
+    "sound effects",
+    "qa",
+    "release",
+    "build verification",
+    "asset license"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Omni Game Studio",
+    "shortDescription": "全引擎全平台游戏专家团 + 正式资源流水线",
+    "longDescription": "Game production skills for the full lifecycle: concept, preproduction and vertical slice, iterative playable sprint builds, production, Alpha/Beta/Gold QA gates, multiplatform release and live operations. Includes Cocos, Unity and Godot guidance plus AI image, animated GIF, sprite-sheet, sound and music workflows. Gate templates capture evidence and review decisions; docs-only checks do not claim a build or QA pass.",
+    "developerName": "JackeyYe",
+    "category": "Engineering",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "defaultPrompt": [
+      "帮我把这个想法跑完整个流程，产出正式可上线的资源：立项 → GDD → 技术方案 → 正式美术与音频 → 可构建工程 → 发布方案",
+      "我的游戏要同时上微信小游戏和 Steam，帮我对比 Cocos Creator、Unity、Godot 该选哪个",
+      "帮我做一套正式的游戏美术资源：先定风格圣经，再逐张生成、后处理到规格并登记授权"
+    ],
+    "brandColor": "#7C3AED",
+    "screenshots": []
+  }
+}
