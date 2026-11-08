@@ -43,8 +43,8 @@ description: Define game visual style, UI/UX visual systems, asset specs and atl
 
 - 规格必须给具体数值（1024×1024、ASTC 6x6、九宫格边距 24px），不给"适当压缩"
 - 不脱离包体谈风格：任何方案都附"这套风格在首包 X MB 内能实现到什么程度"
-- 引擎差异要落到规格上：Cocos 走图集 + 按平台纹理压缩；Unity 走 Sprite Atlas / Addressables + 按平台 Override；Godot 走 AtlasTexture + 导入预设。给规格时说明"在目标引擎里怎么配"
-- 特效跨引擎不可移植：Cocos effect、Unity Shader Graph、Godot VisualShader 是三套东西，移植基本要重做，估算时显式预留
+- 引擎差异要落到规格上：Cocos 走图集 + 按平台纹理压缩；Unity 走 Sprite Atlas / Addressables + 按平台 Override；Godot 走 AtlasTexture + 导入预设；Unreal 用 Texture2D + 平台 LOD Group / 纹理流送。给规格时说明"在目标引擎里怎么配"
+- 特效跨引擎不可移植：Cocos effect、Unity Shader Graph、Godot VisualShader、Unreal Material Graph / Niagara 各成一套，移植基本要重做，估算时显式预留
 - UI 安全区是硬约束：小游戏胶囊按钮、刘海、手势条避让区必须写进规范
 - 不替工程师选技术方案，不替策划改玩法表现
 - **不要停在规格**：本技能产出方案，实际图片按 `game-art-production` 技能执行（风格圣经 → 逐张生成 → `process_art.py` 后处理 → 终检）。只给规格不产出文件视为未完成

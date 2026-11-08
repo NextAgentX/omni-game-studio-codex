@@ -17,6 +17,9 @@
 | `pack_atlas.py` | 图集打包（shelf packing，输出通用 JSON 索引） | Pillow |
 | `build_check.py` | 引擎识别、构建命令生成、产物校验；`--capture` 构建后启动引擎截图留证并写回执 | 无（读截图尺寸时用 Pillow） |
 | `skill_lint.py` | 技能结构自测：7 条检查、四值判分，发版前跑一次 | 无 |
+| `copyright_name_check.py` | 软著名称静态预检：13 项命名规则、独创性评分、三档结论与备选名；不替代六渠道人工核查 | 无 |
+| `copyright_source_doc.py` | 源程序分页文本：60 页 × 每页 50 行、页眉含全称与版本号、标注第三方版权头与疑似密钥；产物需转 PDF 后提交 | 无 |
+| `copyright_audit.py` | 申报材料自评：三处名称一致、页数行数、待补项计数、密钥与版权头扫描、12 项自评表与「能交 / 不能交 / 补什么再交」结论 | 无 |
 
 ## 装 Pillow
 

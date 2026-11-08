@@ -24,7 +24,7 @@
 
 ## 交互音频映射表
 
-[TODO] 标引擎组件名（Cocos AudioSource / Unity AudioSource+Mixer / Godot AudioStreamPlayer）。
+[TODO] 标引擎组件名（Cocos AudioSource / Unity AudioSource+Mixer / Godot AudioStreamPlayer / Unreal Audio Component + Sound Cue 或 MetaSound）。
 
 | 游戏事件 | 音效 | 播放时机（帧偏移） | 并发限制 | 抑制条件 |
 |---------|------|------------------|---------|---------|

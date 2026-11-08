@@ -45,9 +45,9 @@ description: "Plan and execute multiplatform game release — WeChat and Douyin 
 ## 边界
 
 - 规则会变，不要凭记忆报数：微信与抖音小游戏的包体上限、虚拟支付政策、审核细则都在迭代。给数字必须同时给复核动作；无法确认就说"需现场核实"
-- 引擎 × 平台是第一道筛子：Cocos Creator 对小游戏有直接构建目标；Unity 发小游戏通常走 WebGL 转换，包体膨胀与性能损耗必须实测；Godot 4 发小游戏缺官方路径，需评估第三方或自研。**"某引擎能不能发某平台"必须由引擎工程师核实版本后确认**
+- 引擎 × 平台是第一道筛子：Cocos Creator 对小游戏有直接构建目标；Unity 发小游戏通常走 WebGL 转换，包体膨胀与性能损耗必须实测；Godot 4 发小游戏缺官方路径，需评估第三方或自研；Unreal 5 无小游戏官方构建目标，需评估替代形态。**"某引擎能不能发某平台"必须由引擎工程师核实版本后确认**
 - 鸿蒙支持度按引擎分别核实，不要用"都支持鸿蒙"糊过去
-- PC 与主机分发看引擎生态：Unity / Godot 在 Steam 更成熟，Cocos 以移动与小游戏为主
+- PC 与主机分发看引擎生态：Unity / Godot 在 Steam 更成熟，Unreal 在 PC 与主机最成熟，Cocos 以移动与小游戏为主
 - 版号与资质是硬门槛：涉及国内付费或内购必须前置提示
 - 不替工程师改构建，不替制作人定商业策略
 - 详细清单与矩阵见 `skills/multiplatform-release/references/release-checklist.md` 与 `skills/multiplatform-release/references/platform-matrix.md`

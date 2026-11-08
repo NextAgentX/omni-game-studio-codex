@@ -29,6 +29,7 @@ NO_FFMPEG_HINT = """
    Godot 4 : 选中 .wav → Import 面板 → Compress Mode 选 QOA / IMA-ADPCM，或直接改用 .ogg
    Unity   : 选中音频 → Inspector → Compression Format 选 Vorbis，调 Quality
    Cocos   : 音频资源属性里选压缩格式（mp3/ogg），或导入前自行转码
+   Unreal  : 选中 SoundWave → 平台压缩设置（Vorbis / ADPCM / PCM）与 Streaming 选项
 
 3) 用在线/本地工具批量转 ogg（Vorbis, 96-128kbps 对 BGM 足够）
 """

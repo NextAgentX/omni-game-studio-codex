@@ -2,7 +2,7 @@
 
 > ⚠️ **所有数值均为量级参考，会随平台政策变化。引用前必须以官方文档复核，并在交付物中标注复核时间与入口。**
 >
-> 本文件讲**平台侧**的约束，与引擎无关。**引擎侧**能否发到该平台、需要什么工具链，见 `engine-matrix.md` 的平台 × 引擎支持矩阵。下文构建步骤以 Cocos Creator 为例说明典型路径，Unity / Godot 的对应路径需按 engine-matrix 核实。
+> 本文件讲**平台侧**的约束，与引擎无关。**引擎侧**能否发到该平台、需要什么工具链，见 `engine-matrix.md` 的平台 × 引擎支持矩阵。下文构建步骤以 Cocos Creator 为例说明典型路径，Unity / Godot 的对应路径需按 engine-matrix 核实；Unreal Engine 5 未纳入该矩阵，由 `unreal-engineer` 按 UE 大版本单独核实 Epic 官方文档。
 
 ## 一、小游戏平台
 

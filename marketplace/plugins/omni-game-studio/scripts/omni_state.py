@@ -3,6 +3,7 @@
 
 用法:
   python omni_state.py init  --root . --engine godot --version 4.3 --platforms web,android
+  python omni_state.py init  --root . --engine unreal --version 5.4 --platforms windows
   python omni_state.py status --root .
   python omni_state.py advance --root . --to gdd
   python omni_state.py check  --root . --stage gdd
@@ -342,7 +343,7 @@ def cmd_status(args):
     root = Path(args.root).resolve()
     data = load(root)
     if not data:
-        print("未初始化。先运行: python omni_state.py init --root . --engine <godot|unity|cocos>")
+        print("未初始化。先运行: python omni_state.py init --root . --engine <godot|unity|cocos|unreal>")
         return 1
 
     print(f"项目: {data.get('project')}   引擎: {data.get('engine')} {data.get('engine_version','')}".rstrip())
@@ -452,8 +453,8 @@ def cmd_set(args):
     if args.key not in {"project", "engine", "engine_version", "platforms"}:
         print("不可修改该字段；允许: project, engine, engine_version, platforms")
         return 1
-    if args.key == "engine" and args.value not in {"cocos", "unity", "godot"}:
-        print("引擎必须是 cocos、unity 或 godot")
+    if args.key == "engine" and args.value not in {"cocos", "unity", "godot", "unreal"}:
+        print("引擎必须是 cocos、unity、godot 或 unreal")
         return 1
     if args.key == "platforms":
         data[args.key] = [p.strip() for p in args.value.split(",") if p.strip()]
@@ -472,7 +473,7 @@ def main():
     p = sub.add_parser("init", help="初始化项目状态")
     p.add_argument("--root", default=".")
     p.add_argument("--name")
-    p.add_argument("--engine", required=True, choices=["cocos", "unity", "godot"])
+    p.add_argument("--engine", required=True, choices=["cocos", "unity", "godot", "unreal"])
     p.add_argument("--version")
     p.add_argument("--platforms", help="逗号分隔，如 web,android,wechat")
     p.set_defaults(func=cmd_init)

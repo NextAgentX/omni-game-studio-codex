@@ -112,7 +112,7 @@ class SkillLintRules(unittest.TestCase):
             self.assertEqual(verdict(skill_lint.lint_skill(root / "skills" / "demo", root), "SZ1"), "FAIL")
 
     def test_shipped_skills_pass(self):
-        """The 14 shipped skills must stay structurally clean."""
+        """Shipped skills must stay structurally clean."""
         if not (ROOT / "skills").is_dir():
             self.skipTest("no skills directory")
         result = subprocess.run([sys.executable, "-X", "utf8", str(SCRIPTS / "skill_lint.py"),

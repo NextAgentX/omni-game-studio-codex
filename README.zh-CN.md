@@ -4,7 +4,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/NextAgentX/omni-game-studio-codex?style=social)](https://github.com/NextAgentX/omni-game-studio-codex/stargazers) [![Issues](https://img.shields.io/github/issues/NextAgentX/omni-game-studio-codex)](https://github.com/NextAgentX/omni-game-studio-codex/issues) [![CI](https://github.com/NextAgentX/omni-game-studio-codex/actions/workflows/ci.yml/badge.svg)](https://github.com/NextAgentX/omni-game-studio-codex/actions/workflows/ci.yml)
 
-**Omni Game Studio 是面向 Codex 的实用型游戏制作工具集。** 它把策划、工程、美术、音频、测试、发行等专业工作整理成可调用的技能、可选角色提示词、工程模板、文档模板和制作脚本，支持 **Cocos Creator、Unity 与 Godot**。
+**Omni Game Studio 是面向 Codex 的实用型游戏制作工具集。** 它把策划、工程、美术、音频、测试、发行等专业工作整理成可调用的技能、可选角色提示词、工程模板、文档模板和制作脚本，支持 **Cocos Creator、Unity、Godot 与 Unreal Engine 5**，另附一条可选的**软著申报能力线**，用于游戏做完后的确权与上架资质。
 
 你可以让它处理现有游戏中的单项任务，也可以从一个想法开始推进完整制作流程。它会沿用项目当前引擎和阶段，不会要求已有项目从零建档。
 
@@ -16,11 +16,11 @@ Omni Game Studio 为 Codex 提供这些分工明确的工作流，帮助把需�
 
 ### 包含内容
 
-- **14 个技能：** 覆盖编排、设计、引擎工程、资源制作、QA、发行和运营。
-- **8 个可选角色：** Cocos、Unity、Godot、美术、音频、叙事、QA 和发行。
-- **13 个 Python 脚本：** 处理 AI 媒体适配、资源制作、manifest、构建、运行留证、音频和流程状态。
-- **10 份文档模板：** 包含制作路线图、Sprint 复盘及 G1–G5 里程碑评审。
-- **3 个引擎模板：** Godot 4、Unity、Cocos Creator 3.x 小型起步工程。
+- **20 个技能：** 15 个游戏制作技能（编排、设计、引擎工程、资源制作、QA、发行、运营）+ 5 个软著申报技能。
+- **13 个可选角色：** 9 个游戏角色（Cocos、Unity、Godot、Unreal、美术、音频、叙事、QA、发行）+ 4 个软著申报角色。
+- **16 个 Python 脚本：** AI 媒体适配、资源制作、manifest、构建、运行留证、音频、流程状态，以及 3 个软著材料检查脚本。
+- **14 份文档模板：** 10 份制作文档（路线图、Sprint 复盘、G1–G5 里程碑评审）+ 4 份软著申报模板（说明书与申请表、自评表、HTML 指导报告、FAQ）。
+- **3 个引擎模板：** Godot 4、Unity、Cocos Creator 3.x 小型起步工程（Unreal Engine 5 起步模板暂未提供）。
 
 #### 技能分组
 
@@ -28,9 +28,10 @@ Omni Game Studio 为 Codex 提供这些分工明确的工作流，帮助把需�
 |---|---|
 | 总编排与制作流水线 | `omni-game-studio`、`game-production-pipeline` |
 | 设计 | `game-narrative-design`、`game-art-direction`、`game-audio-design` |
-| 引擎工程 | `cocos-engineering`、`unity-engineering`、`godot-engineering` |
+| 引擎工程 | `cocos-engineering`、`unity-engineering`、`godot-engineering`、`unreal-engineering` |
 | 美术、动效与音频制作 | `game-art-production`、`game-animation-production`、`game-audio-production` |
 | QA、平台与发行 | `game-qa-testing`、`multiplatform-release`、`game-release-liveops` |
+| 软著申报 | `copyright-filing`、`software-name-checker`、`copyright-material-kit`、`copyright-risk-audit`、`copyright-filing-guide` |
 
 ### 制作流程
 
@@ -46,13 +47,31 @@ Omni Game Studio 为 Codex 提供这些分工明确的工作流，帮助把需�
 
 七个文档阶段（`brief`、`gdd`、`tech`、`art`、`audio`、`qa`、`release`）管理制作工件，不能代替 G1–G5 评审。`omni_state.py` 只检查文档结构和 TODO，不会验证真实可玩构建、测试结果、设备兼容性或发行审批。
 
+### 软著申报能力线
+
+游戏做完只是「能上线」，确权之后才是「能保护、能上架、能维权」。`copyright-filing` 技能按四段 SOP 编排：**Phase 0** 确认软件目录 / 全称与版本号 / 著作权人 → **Phase 0.5** 名称查重并锁死（不可跳过，锁死后源程序文档页眉、说明书封面、申请表三处逐字一致）→ **Phase 1** 材料串行生成 → **Phase 2** 风险体检与小白指导双线并行 → **Phase 3** 汇编交付（能交了吗 / 交什么 / 怎么交 / 红线原文一条不省略）。按 W1–W7 工作流路由，也支持单角色直调。
+
+配套 4 个技能：`software-name-checker`（13 项命名规则 + 六渠道核查 + 三档结论）、`copyright-material-kit`（60 页 × 每页 50 行源程序文档、说明书、申请表、材料清单）、`copyright-risk-audit`（12 项风险红黄绿分级 + 提交前自评表 + 红线）、`copyright-filing-guide`（单文件 HTML 小白指导报告 + FAQ）。
+
+三个脚本均为零第三方依赖（只用标准库、不联网、不需要 API key）：
+
+```bash
+python scripts/copyright_name_check.py --name "星轨塔防游戏软件" --version V1.0 --industry 游戏 --json
+python scripts/copyright_source_doc.py --root . --name "星轨塔防游戏软件" --version V1.0 --out copyright-out/源程序文档.txt
+python scripts/copyright_audit.py --root copyright-out --name "星轨塔防游戏软件" --version V1.0
+```
+
+模板在 `templates/copyright/`：说明书骨架与申请表字段、提交前自评表、单文件内联 CSS 的 HTML 指导报告、常见问题。
+
+边界要如实说清：软著登记是**形式审查**，中国版权保护中心不比对名称是否已被他人登记，查名称不是为过审，而是避免「拿到证书后产品不能叫这个名字」，真正的墙在商标和应用商店。脚本只做静态检查，产物是分页文本与 HTML、需转 PDF 后提交，不替代六渠道人工核查与官方审查，不承诺过审、不替用户做法律判断。Codex 没有 WorkBuddy 的团队运行时工具，协作以流程契约表达而非工具调用。
+
 ### 快速开始
 
 #### 环境要求
 
 - 支持 Git 插件市场的 Codex CLI。
 - Python 3.9+，用于运行插件脚本。
-- Pillow：图片处理、精灵表切帧、图集打包和部分资源检查需要。
+- Pillow：图片处理、精灵表切帧、图集打包和部分资源检查需要；三个软著脚本不需要。
 - 只有选择直接 API 适配器时才需要 `OPENAI_API_KEY` 或 `ELEVENLABS_API_KEY`。Codex 会话原生工具的配置要求可能不同。
 
 #### 安装
@@ -71,6 +90,7 @@ Omni Game Studio 为 Codex 提供这些分工明确的工作流，帮助把需�
 - “检查这个 Godot 项目并修复输入问题，不要改变场景架构。”
 - “为这个 Unity 游戏规划垂直切片，并列出通过 G2 评审需要的构建证据。”
 - “为下一个可玩 Sprint 制定美术和音频制作计划。”
+- “帮我走一遍软著申报：先锁名称，再出源程序文档和说明书，最后给风险体检和一份小白指导报告。”
 
 ### AI 美术、动效与音频
 
@@ -100,7 +120,7 @@ python scripts/gen_ai_audio.py sfx --prompt "short bright pickup chime" --durati
 
 ### 模板、脚本与检查
 
-`templates/docs/` 包含七个阶段文档和三个生命周期模板：制作路线图、Sprint 复盘、里程碑评审。三个引擎模板都刻意保持小而清晰：Godot 4 模板可运行，Unity 模板需执行场景生成步骤，Cocos 模板需在编辑器中创建场景。
+`templates/docs/` 包含七个阶段文档和三个生命周期模板：制作路线图、Sprint 复盘、里程碑评审；`templates/copyright/` 另有 4 份软著申报模板。三个引擎模板都刻意保持小而清晰：Godot 4 模板可运行，Unity 模板需执行场景生成步骤，Cocos 模板需在编辑器中创建场景；Unreal Engine 5 起步模板暂未提供，需由 `unreal-engineer` 生成工程骨架。
 
 `scripts/` 包含：
 
@@ -110,6 +130,7 @@ python scripts/gen_ai_audio.py sfx --prompt "short bright pickup chime" --durati
 - `validate_assets.py`、`build_check.py`：资源和构建检查；`--capture` 会把游戏跑起来并留下带哈希回执的截图。
 - `gen_placeholder_art.py`：只用于验证资源流程的占位图，不是正式美术。
 - `skill_lint.py`：技能文件自身的结构自测。
+- `copyright_name_check.py`、`copyright_source_doc.py`、`copyright_audit.py`：软著申报（只用标准库，详见 `scripts/README.md`）。
 
 运行各脚本的 `--help` 查看参数。部分图片工具需要 Pillow，音频压缩可选使用 ffmpeg。更多细节见[脚本说明](marketplace/plugins/omni-game-studio/scripts/README.md)、[模板说明](marketplace/plugins/omni-game-studio/templates/README.md)和[版本记录](OPTIMIZATION.md)。
 
@@ -135,6 +156,7 @@ python -m unittest discover -s tests -v        # 脚本回归测试
 - 发布前实际运行构建和测试，在游戏中检查生成资源，并验证目标设备与平台行为。
 - AI 模型权限、API 功能、价格和使用条款取决于服务商与账户；商用前请核对当前条款。
 - 当前动效流程侧重 2D，不能替代完整的 3D 建模、绑定或视频制作流水线。
+- 软著脚本产出的是分页文本与 HTML，需转 PDF/DOCX 后提交；它们是静态检查，不构成法律意见，也不保证登记通过。
 
 ### 参与贡献
 

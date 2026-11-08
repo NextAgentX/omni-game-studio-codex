@@ -3,6 +3,8 @@
 分析对象：[Donchitos/Claude-Code-Game-Studios](https://github.com/Donchitos/Claude-Code-Game-Studios)（MIT，638 文件 / 49 agents / 74 skills / 15 hooks / 14 rules / 62 templates / framework 1.2.0）
 本地基线：Omni Game Studio v3.5.0（14 skills / 8 subagents / 12 scripts / 10 templates / 3 engine starters）
 
+> 注：以上是本文件撰写时 v3.5.0 的历史基线快照，分析结论不随工作树改写。工作树现已加入 Unreal 工程师与技能（15 skills / 9 subagents），属于未发布变更，见 OPTIMIZATION.md 顶部「未发布」区块。
+
 定位差异先说清：CCGS 是**给单个游戏项目用的模板**（克隆到你自己的游戏仓库里，跟着游戏一起演进）；本项目是**分发的插件**（装到任意仓库，不能假设项目结构）。因此 CCGS 里大量"改宿主配置"的机制（hooks / settings.json / statusline / permissions）**不可移植**；真正值钱的是它的**流程设计与质量闭环**。
 
 ---

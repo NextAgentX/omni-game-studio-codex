@@ -1,6 +1,6 @@
 # 工程结构与资源规范（三引擎）
 
-> 第一至六节以 Cocos Creator 为例讲通用原则（依赖方向、图集、分包、性能预算），这些原则对 Unity 与 Godot 同样成立。第七、八节给 Unity 与 Godot 的对应落法。
+> 第一至六节以 Cocos Creator 为例讲通用原则（依赖方向、图集、分包、性能预算），这些原则对 Unity、Godot 与 Unreal 同样成立。第七、八节给 Unity 与 Godot 的对应落法；Unreal 的模块与 Content 目录落法见 `unreal-engineering` 技能。
 
 ## 一、目录结构建议（Cocos Creator）
 

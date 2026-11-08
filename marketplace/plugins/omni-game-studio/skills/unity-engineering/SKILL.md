@@ -34,6 +34,6 @@ description: Engineer games in Unity — inspect and extend projects, design arc
 
 ## 边界
 
-- 只负责 Unity 工程；Godot 和 Cocos 项目交给对应工程技能。
+- 只负责 Unity 工程；Godot、Cocos 和 Unreal 项目交给对应工程技能。
 - Unity 版本、平台工具链、小游戏转换、HarmonyOS 支持与发行规则会变化。任何支持性结论都要标注适用版本并核对 Unity 官方文档及平台官方要求。
 - 不在没有基线数据时承诺性能提升；不把 Editor 可运行等同于目标平台构建通过。

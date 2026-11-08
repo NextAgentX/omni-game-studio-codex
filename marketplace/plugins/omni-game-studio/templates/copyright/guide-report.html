@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<!--
+  软著申报指导报告模板 · 单文件 / 零外部依赖 / 断网可读 / 可打印
+  填法：逐个替换所有双花括号占位符；全部填完后全文搜索占位符起始标记，结果必须为 0 处。
+  占位符清单（名称不含括号）：
+  SOFTWARE_NAME VERSION OWNER CATEGORY CODE_LINES REPORT_DATE
+  VERDICT VERDICT_BADGE VERDICT_NOTE PROJECT_SUMMARY DURATION
+  STATUS_FORM STATUS_SOURCE STATUS_MANUAL STATUS_ID STATUS_RIGHT
+  DETAIL_FORM DETAIL_SOURCE DETAIL_MANUAL DETAIL_ID DETAIL_RIGHT
+  PENDING_COUNT TODO_LIST NAME_VERDICT NAME_BADGE NAME_BODY
+  取值约束：STATUS_* 只准「已生成 / 待补 / 待确认」；状态徽章由 data-s 自动着色；
+  VERDICT 只准「能交 / 不能交 / 补什么再交」，VERDICT_BADGE / NAME_BADGE 只准 b-grn / b-yel / b-red；
+  NAME_VERDICT 只准「可以直用 / 建议微调 / 必须改名」；PROJECT_SUMMARY 填 p 标签包裹的 2–4 句；
+  TODO_LIST 填 ul/li 列表；NAME_BODY 填渠道核查表与一句人话解释。
+  数字必须来自真实扫描或用户提供；缺项写「待确认」并说明找谁要；不许把「待补」写成「已生成」。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>软著申请指导报告 · {{SOFTWARE_NAME}} {{VERSION}}</title>
+<style>
+:root{color-scheme:light;--bg:#f4f7fb;--card:#fff;--ink:#152033;--ink2:#3e4a60;--ink3:#5f6c80;--line:#dfe6f0;--brand:#1c5dbf;--soft:#eaf2ff;--ok-bg:#e3f5ea;--ok-fg:#0a6339;--warn-bg:#fff1d6;--warn-fg:#845000;--bad-bg:#fdeaea;--bad-fg:#9e201b;--shadow:0 1px 3px rgba(20,35,60,.08)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:24px 16px 56px}
+h1,h2,h3{line-height:1.35;margin:0 0 12px}
+h1{font-size:26px}
+h2{font-size:19px}
+h3{font-size:16px;margin-top:14px}
+p{margin:0 0 10px}
+a{color:var(--brand)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 16px;box-shadow:var(--shadow)}
+.hero{border-left:5px solid var(--brand)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--ink2);font-size:14px;margin-top:10px}
+.meta b{color:var(--ink)}
+.lede{font-size:17px;font-weight:600}
+.muted{color:var(--ink3);font-size:13px}
+.sec{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+.sec small{color:var(--ink3);font-weight:400;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft);font-weight:600}
+tr{break-inside:avoid}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;background:var(--soft);color:var(--brand)}
+.badge[data-s="已生成"]{background:var(--ok-bg);color:var(--ok-fg)}
+.badge[data-s="待补"]{background:var(--warn-bg);color:var(--warn-fg)}
+.b-grn{background:var(--ok-bg);color:var(--ok-fg)}
+.b-yel{background:var(--warn-bg);color:var(--warn-fg)}
+.b-red{background:var(--bad-bg);color:var(--bad-fg)}
+.b-gry{background:var(--soft);color:var(--brand)}
+.step{border-left:3px solid var(--brand);padding:2px 0 2px 14px;margin:0 0 16px;break-inside:avoid}
+.step h3{margin:0 0 6px}
+.done{background:var(--ok-bg);color:var(--ok-fg);border-radius:8px;padding:8px 12px;font-size:14px;margin-top:8px}
+.warn{background:var(--warn-bg);color:var(--warn-fg);border-radius:8px;padding:10px 12px;font-size:14px}
+details{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0 0 8px;background:var(--card);break-inside:avoid}
+summary{cursor:pointer;font-weight:600}
+details p{margin:8px 0 0;color:var(--ink2);font-size:14px}
+ol,ul{margin:0 0 10px;padding-left:20px}
+li{margin:0 0 6px}
+.redline{background:var(--bad-bg);color:var(--bad-fg);border-radius:8px;padding:12px 14px;font-size:14px}
+.redline li{margin:0 0 8px}
+.three{counter-reset:t;list-style:none;padding:0}
+.three li{counter-increment:t;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 8px}
+.three li::before{content:"第 " counter(t) " 步  ";color:var(--brand);font-weight:700}
+.chk{list-style:none;padding:0}
+.chk li{padding-left:26px;position:relative}
+.chk li::before{content:"□";position:absolute;left:0;color:var(--brand);font-size:17px}
+footer{color:var(--ink3);font-size:13px;border-top:1px solid var(--line);padding-top:14px;margin-top:8px}
+@media (max-width:600px){.wrap{padding:16px 10px 40px}h1{font-size:22px}table{font-size:13px}th,td{padding:7px 6px}}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#111720;--card:#1b2430;--ink:#eef3fa;--ink2:#c3cede;--ink3:#98a6ba;--line:#334155;--brand:#8ab6ff;--soft:#1e3350;--ok-bg:#163a2a;--ok-fg:#8ce0b3;--warn-bg:#3a2c10;--warn-fg:#f2c979;--bad-bg:#3d1c1c;--bad-fg:#ffb0b0;--shadow:none}}
+@media print{@page{size:A4;margin:16mm}:root{color-scheme:light;--bg:#fff;--card:#fff;--ink:#000;--ink2:#222;--ink3:#444;--line:#bbb;--brand:#000;--soft:#eee;--ok-bg:#e8f5ec;--ok-fg:#0a5c34;--warn-bg:#fff4dd;--warn-fg:#7a4a00;--bad-bg:#fdeaea;--bad-fg:#8e1b16;--shadow:none}body{background:#fff;font-size:12px}.wrap{max-width:none;padding:0}.card,.step,details,tr,li{break-inside:avoid;box-shadow:none}h1,h2,h3{break-after:avoid}.hero{border-left:3px solid #000}details{background:#fff}summary{cursor:default}a{color:#000;text-decoration:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="card hero">
+  <p class="muted">软件著作权登记 · 操作指导报告</p>
+  <h1>{{SOFTWARE_NAME}} {{VERSION}} 申报指导</h1>
+  <div class="meta">
+    <span>著作权人：<b>{{OWNER}}</b></span>
+    <span>软件分类：<b>{{CATEGORY}}</b></span>
+    <span>源程序量：<b>{{CODE_LINES}}</b> 行</span>
+    <span>生成日期：<b>{{REPORT_DATE}}</b></span>
+  </div>
+</header>
+<section class="card">
+  <h2 class="sec">一句话结论 <small>先看这一句，再往下做</small></h2>
+  <p class="lede">当前结论：<span class="badge {{VERDICT_BADGE}}">{{VERDICT}}</span></p>
+  <p>{{VERDICT_NOTE}}</p>
+  <p class="muted">结论只有三种：能交 / 不能交 / 补什么再交。本报告不承诺一定过审，也不替你做法律判断。</p>
+</section>
+<section class="card">
+  <h2 class="sec">先懂三个词 <small>后面反复出现</small></h2>
+  <p><b>形式审查</b>：登记机构主要看材料齐不齐、格式对不对，不比对你的软件名字是不是已经被别人登记了。</p>
+  <p><b>60 页口径</b>：源程序文档每页 50 行；源码不足 60 页交全部，超过 60 页交前 30 页 + 后 30 页，页眉要带软件全称与版本号。</p>
+  <p><b>补正</b>：审查员发现材料有问题，发通知让你在期限内补交或改格式；不是驳回，按期回复就行，逾期通常视为撤回申请。</p>
+</section>
+<section class="card">
+  <h2 class="sec">材料状态表 <small>每行只准写「已生成」或「待补」</small></h2>
+  <table>
+    <thead><tr><th>材料</th><th>状态</th><th>文件 / 位置</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>申请表</td><td><span class="badge" data-s="{{STATUS_FORM}}">{{STATUS_FORM}}</span></td><td>{{DETAIL_FORM}}</td><td>软件全称 + 版本号须与页眉、封面逐字一致</td></tr>
+      <tr><td>源程序文档</td><td><span class="badge" data-s="{{STATUS_SOURCE}}">{{STATUS_SOURCE}}</span></td><td>{{DETAIL_SOURCE}}</td><td>60 页口径、每页 50 行，页眉带软件全称与版本号</td></tr>
+      <tr><td>软件说明书</td><td><span class="badge" data-s="{{STATUS_MANUAL}}">{{STATUS_MANUAL}}</span></td><td>{{DETAIL_MANUAL}}</td><td>【待补充】还有 <b>{{PENDING_COUNT}}</b> 处，交之前必须清零</td></tr>
+      <tr><td>身份证明</td><td><span class="badge" data-s="{{STATUS_ID}}">{{STATUS_ID}}</span></td><td>{{DETAIL_ID}}</td><td>单位：营业执照复印件盖章；个人：身份证复印件签字</td></tr>
+      <tr><td>权属证明</td><td><span class="badge" data-s="{{STATUS_RIGHT}}">{{STATUS_RIGHT}}</span></td><td>{{DETAIL_RIGHT}}</td><td>不需要就写「不需要」别空着；合作 / 委托 / 职务开发要交</td></tr>
+    </tbody>
+  </table>
+  <p class="muted" style="margin-top:10px">图例：<span class="badge b-grn">已生成</span> 文件在手、可直接交；<span class="badge b-yel">待补</span> 还差东西，交之前必须补齐；<span class="badge b-gry">待确认</span> 信息没到，先找主理人要，不许猜。状态照抄材料线原文，不许把「待补」写成「已生成」。</p>
+</section>
+<section class="card">
+  <h2 class="sec">本项目实况 <small>数字来自真实扫描</small></h2>
+  <div>{{PROJECT_SUMMARY}}</div>
+  <h3>交之前还差这些</h3>
+  {{TODO_LIST}}
+</section>
+<section class="card">
+  <h2 class="sec">名称核查 <small>结论只有三档，来自风控官</small></h2>
+  <p>结论：<span class="badge {{NAME_BADGE}}">{{NAME_VERDICT}}</span>　软件全称 + 版本号：<b>{{SOFTWARE_NAME}} {{VERSION}}</b></p>
+  {{NAME_BODY}}
+  <p class="muted">名称在核查锁死后不许再改一个字：页眉、封面、申请表三处要同步；中途改名 = 整套材料重做，已下证的要重新申请。</p>
+</section>
+<section class="card">
+  <h2 class="sec">分步操作 <small>照着点、照着交；每步都有做完的标志</small></h2>
+  <div class="step">
+    <h3>第 1 步 · 准备材料（先别急着上网）</h3>
+    <p>打开本项目材料目录，把四样东西摆齐：申请表、源程序文档、软件说明书、身份证明（单位交营业执照复印件盖章，个人交身份证复印件签字）。逐项核对三处一致（源程序文档页眉 / 说明书封面 / 申请表「软件全称」的「软件全称 + 版本号」逐字一致）、源程序文档 60 页口径、说明书【待补充】是否清零。</p>
+    <p class="muted">需要转 PDF 的文件现在就转，确认文件能打开、页数对得上。</p>
+    <div class="done">做完的标志：状态表五行全是「已生成」，且三处软件全称 + 版本号一个字都不差。</div>
+  </div>
+  <div class="step">
+    <h3>第 2 步 · 注册 / 登录中国版权保护中心</h3>
+    <p>在浏览器搜索「中国版权保护中心」，认准带官方标识的站点（官方域名 www.ccopyright.com 或 www.ccopyright.com.cn）。搜索结果里冒用中心名称的代理广告不要点。进官网后找「著作权登记 / 软件登记」入口，注册账号并完成<b>实名认证</b>——没做实名认证，后面填不了表。</p>
+    <p class="muted">登记系统入口名称会调整，以官网当期要求为准；建议使用官网推荐的浏览器版本。</p>
+    <div class="done">做完的标志：能登录著作权登记系统，账号状态显示实名认证已通过。</div>
+  </div>
+  <div class="step">
+    <h3>第 3 步 · 在线填申请表</h3>
+    <p>在登记系统里选「计算机软件著作权登记申请」，按字段逐项填：软件全称、版本号、著作权人、开发完成日期、首次发表日期（未发表就选未发表）、权利取得方式、软件分类、运行的硬件与软件环境、主要功能与技术特点。申请表里的「软件全称 + 版本号」必须和源程序文档页眉、说明书封面逐字一致。填完下载申请确认签章页，单位盖公章、个人签字，再扫描回传。</p>
+    <p class="muted">别在这里顺手改名字：名称锁死后一个字都不能动，改了整套材料都要重做。</p>
+    <div class="done">做完的标志：三处名称逐字一致，签章页已盖章并成功上传。</div>
+  </div>
+  <div class="step">
+    <h3>第 4 步 · 上传源程序文档与说明书</h3>
+    <p>按申请表页面给出的材料项逐个上传：源程序文档、软件说明书、申请确认签章页、身份证明；涉及权属证明的一并上传（合作开发协议、委托开发协议、职务开发说明等）。上传前再确认一次：源程序文档 60 页口径、每页 50 行、页眉正确；说明书里没有【待补充】。</p>
+    <p class="muted">说明书里的【待补充】不能交：那是还缺内容的地方，必须补齐并重新清点处数，不许把标记抹掉当成写完。</p>
+    <div class="done">做完的标志：每个材料项都显示上传成功，页数与行数符合 60 页口径，说明书【待补充】处数为 0。</div>
+  </div>
+  <div class="step">
+    <h3>第 5 步 · 提交、缴费、等待</h3>
+    <p>核对一遍再点提交。提交后按系统提示缴费（是否收费、收多少、有无加急通道，以官网当期要求为准，别信代理报价单上的数字）。记下受理号，之后在系统里查进度。本项目预计周期：{{DURATION}}，同样以官网当期要求为准。</p>
+    <p class="muted">常见顺序是：账号注册 → 实名认证 → 填报提交 → 登记机构受理 → 审查 → 取得登记证书。</p>
+    <div class="done">做完的标志：拿到受理号，系统里能查到申请进度。</div>
+  </div>
+  <div class="step">
+    <h3>第 6 步 · 收到补正通知怎么办</h3>
+    <p>补正 = 审查员发现材料有问题，发通知让你在期限内补交或改格式，不是驳回，也不用重新申请。逐条读通知，按条目改：该补文件补文件、该改页眉改页眉、该盖章盖章，然后在通知要求的期限内，从原申请入口提交补正材料。逾期未补正通常会被视为撤回申请。</p>
+    <p class="muted">别慌，也别改软件全称和版本号：名称锁死后一个字都不能动。</p>
+    <div class="done">做完的标志：系统显示补正材料已提交，且在通知规定的期限内。</div>
+  </div>
+</section>
+<section class="card">
+  <h2 class="sec">提交顺序 <small>三句话，顺序不能反</small></h2>
+  <ol class="three">
+    <li>先锁名称：名称核查结论出来后，把「软件全称 + 版本号」定死，之后一个字都不改。</li>
+    <li>再备齐材料：源程序文档按 60 页口径、说明书清零【待补充】、申请表与身份证明备齐，材料状态表全绿。</li>
+    <li>最后按申请表逐项上传：按申请表字段顺序上传源程序文档与说明书，提交、缴费、等待审查结果。</li>
+  </ol>
+  <p class="warn">名称没锁死不做材料——这是整个流程里唯一「越晚发现越贵」的环节。中途改名 = 整套材料重做，已经下证的要重新申请。</p>
+</section>
+<section class="card">
+  <h2 class="sec">常见问题 <small>点开看答案，完整清单见随附 FAQ</small></h2>
+  <details open><summary>1. 软著是形式审查吗？</summary><p>是。结论：登记机构主要看材料齐不齐、格式对不对，不比对你的软件名字是否已被他人登记，也不评判技术含量。理由：这是自愿登记，证书是权属的初步证据，不是对名称或技术的授权。所以别把「能拿证」理解成「这名字随便用」。</p></details>
+  <details open><summary>2. 名称要不要查？查了是为了过审吗？</summary><p>要查，但不是为了过审。结论：查名称是为了避免「拿到证书后产品却不能叫这个名字」。理由：真正的墙在商标和应用商店——别人在第 9 / 42 类注册了同名商标，你证书照样能拿，上架却可能被投诉下架。</p></details>
+  <details open><summary>3. 60 页 / 每页 50 行怎么算？源码不足 60 页怎么办？</summary><p>结论：每页 50 行，不足 60 页交全部，超过 60 页交前 30 页 + 后 30 页。理由：这是鉴别材料的固定口径，页眉还要带软件全称与版本号；按项目实际代码行数算，别凑页数、别补空行。</p></details>
+  <details open><summary>4. 说明书里的【待补充】能不能直接交？</summary><p>不能。结论：处数必须显式清点、补齐并如实告知，交之前清零。理由：那是还缺内容的地方，带着标记交上去轻则补正、重则材料不齐不予受理；把标记抹掉当成写完，等于自己骗自己。</p></details>
+  <details open><summary>5. 用了 AI 辅助写代码，要不要说？</summary><p>不用遮掩，也别乱写。结论：如实说明，重点放在独创性与开发过程证据（需求、设计、提交记录、迭代记录）。理由：登记看的是材料与权属，不隐瞒 AI 辅助是为了让过程证据站得住；但本指导不替你做法律判断。</p></details>
+  <details open><summary>6. 著作权人写单位还是个人？已发表 / 未发表有区别吗？</summary><p>结论：谁享有权利就写谁；单位开发通常写单位，个人独立开发写个人；已发表就填首次发表日期与地点，未发表就选未发表。理由：填错著作权人是权属瑕疵，说人话就是「这软件法律上可能不算你的」；涉及合作、委托、职务开发要先备权属证明。</p></details>
+  <details open><summary>7. 正常与加急多久？收到补正通知怎么办？</summary><p>结论：周期与费用会变，以官网当期要求为准；补正不是驳回，按通知逐条改、在期限内从原入口提交。理由：逾期未补正通常视为撤回申请，比补材料本身严重得多，别拖。</p></details>
+  <details open><summary>8. 证书拿到就能用这个名字上架吗？</summary><p>不一定。结论：证书只证明这份软件的登记事实，不等于商标权，也不保证应用商店放行。理由：商标冲突的表现是「证书能拿到，但你上架可能被打下来」；上架前另做商标与应用商店名称核查。</p></details>
+</section>
+<section class="card">
+  <h2 class="sec">红线区 <small>高危项原文一条不省略</small></h2>
+  <div class="redline">
+    <ol>
+      <li>三处一致：源程序文档页眉、说明书封面、申请表「软件全称」三处的「软件全称 + 版本号」必须逐字一致；Phase 0.5 名称查重锁死后，全流程不许改一个字；中途改名 = 整套材料重做，已下证的要重新申请。</li>
+      <li>顺序不能反：名称没锁死不做材料，这是唯一「越晚发现越贵」的环节。</li>
+      <li>风控官说「必须改名」就停下来先改名，不许带高风险名称往下做；说「建议微调」且用户坚持不改，可以继续但必须在最终交付里保留这条风险。</li>
+      <li>源程序文档：60 页口径、每页 50 行、页眉规范；源码不足 60 页取全部，超过取前 30 页 + 后 30 页。</li>
+      <li>说明书：【待补充】处数必须显式清点并如实告知用户，不许抹掉。</li>
+      <li>名称查重：13 项命名规则 + 六个渠道占用核查（软著登记公告、商标第 9 / 42 类、应用商店、备案、企业、官网）；结论只有「可以直用 / 建议微调 / 必须改名」三档；需要改时给 3–5 个备选名并推荐其中一个。</li>
+      <li>风险体检：12 项风险分级（红 / 黄 / 绿）+ 每条具体规避动作 + 一张提交前自评表；结论必须是「能交 / 不能交 / 补什么再交」，不许和稀泥。</li>
+      <li>软著登记是形式审查，中国版权保护中心不比对名称是否已被他人登记；查名称是为了避免「拿到证书后产品却不能叫这个名字」，真正的墙在商标和应用商店。</li>
+      <li>不隐瞒 AI 辅助，重点是独创性和过程证据；不夸大也不含糊，不承诺百分百过，不替用户做法律判断。</li>
+      <li>风险说人话：「权属瑕疵」→「这软件法律上可能不算你的」；「商标冲突」→「证书能拿到，但你上架可能被打下来」。</li>
+      <li>汇编交付四件套：能交了吗（一句话结论）、交什么（文件清单 + 每个文件状态）、怎么交（指向本报告路径 + 提交顺序三句话）、红线（高危项原文一条不许省略）。</li>
+      <li>政策口径会变，报告里涉及期限、费用、入口的表述一律加「以官网当期要求为准」。</li>
+    </ol>
+  </div>
+  <h3>坑 / 后果 / 怎么躲</h3>
+  <table>
+    <thead><tr><th>坑</th><th>后果</th><th>怎么躲</th></tr></thead>
+    <tbody>
+      <tr><td>名称没核查就定稿</td><td>证书能拿到，但产品可能不能叫这个名字，上架被商标或应用商店拦下</td><td>先过六个渠道核查，按三档结论处理，需要改时给 3–5 个备选名</td></tr>
+      <tr><td>三处名称不一致</td><td>材料被打回补正，整套文档重做</td><td>锁死后逐字比对页眉、封面、申请表</td></tr>
+      <tr><td>说明书【待补充】没清</td><td>材料不全，补正或不予受理</td><td>显式清点处数，补齐后归零再交</td></tr>
+      <tr><td>源程序文档页数 / 行数不对</td><td>鉴别材料不合规，被要求补正</td><td>按 60 页口径、每页 50 行、不足取全部 / 超过取前后 30 页</td></tr>
+      <tr><td>权属材料缺失</td><td>这软件法律上可能不算你的</td><td>合作 / 委托 / 职务开发先备协议或说明，交前找权利方确认</td></tr>
+      <tr><td>找代理「包过」、信口头周期</td><td>多花钱，还可能被冒名站点骗</td><td>只走官网，期限与费用以官网当期要求为准，不信报价单数字</td></tr>
+    </tbody>
+  </table>
+</section>
+<section class="card">
+  <h2 class="sec">提交前核对 <small>逐项打勾，有一项没过就别点提交</small></h2>
+  <ul class="chk">
+    <li>名称核查结论已出，且「软件全称 + 版本号」已锁死</li>
+    <li>源程序文档页眉、说明书封面、申请表三处逐字一致</li>
+    <li>源程序文档符合 60 页口径、每页 50 行、页眉规范</li>
+    <li>说明书【待补充】处数为 0，并已如实告知过处数</li>
+    <li>材料状态表五行全为「已生成」，需转 PDF 的已转好</li>
+    <li>申请确认签章页已盖章 / 签字并成功上传</li>
+    <li>身份证明齐备；涉及权属的已附协议或说明</li>
+    <li>风险体检结论为「能交」，提交前自评表已逐项通过</li>
+  </ul>
+</section>
+<footer>
+  <p>本报告仅为操作指引，不构成法律意见。登记入口、材料要求、办理期限与费用以中国版权保护中心官网当期要求为准。</p>
+  <p>软著登记是形式审查：不承诺百分百过审，不替你做法律判断；涉及权属、商标、合同纠纷请咨询专业律师或权利方。</p>
+  <p>生成信息：{{SOFTWARE_NAME}} {{VERSION}} · {{REPORT_DATE}} · 材料状态以本报告「材料状态表」为准。</p>
+</footer>
+</div>
+</body>
+</html>

@@ -17,7 +17,7 @@ description: Run an end-to-end game production pipeline with hard stage gates �
 |------|------|---------|
 | `brief` | `docs/00-brief.md` 立项卡 | 制作人（你自己） |
 | `gdd` | `docs/01-gdd.md` | `game-narrative-designer` |
-| `tech` | `docs/02-tech.md` | `cocos-engineer`、`unity-engineer` 或 `godot-engineer` |
+| `tech` | `docs/02-tech.md` | `cocos-engineer`、`unity-engineer`、`godot-engineer` 或 `unreal-engineer` |
 | `art` | `docs/03-art.md` + `docs/art-style-bible.md` + 正式美术 + `assets/manifest.json` | `game-art-director` |
 | `audio` | `docs/04-audio.md` + 正式音频 | `game-audio-designer` |
 | `qa` | `docs/05-qa.md` | `game-qa-engineer` |
@@ -57,7 +57,7 @@ description: Run an end-to-end game production pipeline with hard stage gates �
 ### 0. 落地工程骨架
 
 ```bash
-cp -r <plugin>/templates/godot4/* .        # 或 unity / cocos3
+cp -r <plugin>/templates/godot4/* .        # 或 unity / cocos3；Unreal 暂无起步模板，见下表
 mkdir -p docs assets/art assets/audio doc/temp
 cp <plugin>/templates/docs/*.md docs/
 cp <plugin>/templates/assets-manifest.json assets/manifest.json
@@ -67,13 +67,14 @@ python scripts/omni_state.py checkpoint --root . --task "立项" --next "写 bri
 
 开工前先读 `.omni/active.md`（若有）：那是上个会话留下的当前任务与卡点，压缩或换会话后比对话可靠。
 
-三个模板的成熟度不同，**必须如实告诉用户**：
+三个起步模板的成熟度不同，**必须如实告诉用户**；Unreal 方向暂未提供起步模板：
 
 | 模板 | 状态 | 需要的手动步骤 |
 |------|------|---------------|
 | `godot4` | 可直接运行（已实测导入 + 跑通主场景） | 无 |
 | `unity` | 可打开，场景需生成 | 菜单 Tools ▸ Omni ▸ Create Main Scene |
 | `cocos3` | 代码与配置就绪 | 新建场景 → 挂 `GameRoot` 到 Canvas → 设起始场景 |
+| `unreal5` | **暂未提供起步模板** | 由 `unreal-engineer` 生成 .uproject、Source/、Build.cs 与两个 Target.cs |
 
 ### 1. 立项与概念（G1）
 
@@ -85,7 +86,7 @@ python scripts/omni_state.py checkpoint --root . --task "立项" --next "写 bri
 
 ### 3. 预制作与垂直切片（G2）
 
-按引擎派 `cocos-engineer`、`unity-engineer` 或 `godot-engineer`。要求：先给剖析数据再给优化；分平台构建配置要具体到纹理格式与分包策略。提早实现可玩原型来验证核心循环。
+按引擎派 `cocos-engineer`、`unity-engineer`、`godot-engineer` 或 `unreal-engineer`；Unreal 方向暂无起步模板，需由 `unreal-engineer` 生成 .uproject、Source/、Build.cs 与两个 Target.cs 骨架（见下表）。要求：先给剖析数据再给优化；分平台构建配置要具体到纹理格式与分包策略。提早实现可玩原型来验证核心循环。
 
 ### 4. art（正式资源落地）
 
@@ -119,7 +120,7 @@ python scripts/gen_sfx.py --list
 python scripts/gen_sfx.py --preset hit --out assets/audio/sfx_hit.wav
 ```
 
-- **必须压缩**：`python scripts/compress_audio.py --dir assets/audio --bitrate 96k`；无 ffmpeg 时按脚本提示改用引擎导入期压缩（Godot QOA / Unity Vorbis / Cocos mp3-ogg）
+- **必须压缩**：`python scripts/compress_audio.py --dir assets/audio --bitrate 96k`；无 ffmpeg 时按脚本提示改用引擎导入期压缩（Godot QOA / Unity Vorbis / Cocos mp3-ogg / Unreal Vorbis 与平台压缩设置）
 - **必须写平台差异**：小游戏需交互后播放、iOS 静音键、Web 自动播放策略
 
 ### 批量制作（G3）与 Sprint 循环
@@ -139,7 +140,7 @@ python scripts/omni_state.py advance --root . --to release            # 无证�
 
 截图落在 `docs/qa/evidence/<名字>/`，`receipt.json` 记录所覆盖文件的 sha256。之后任何一次改动都会让这份证据显示过期——过期的截图不算证据，重新截。
 
-解析通过不等于跑起来，跑起来不等于看得对：文字挤出色块、面板溢出、元素没出现，只有看图才发现。Unity 与 Cocos 没有内置的无人值守截图能力，脚本会如实返回 `NOT ASSESSED`；此时用 `--capture-cmd` 给命令，或明说"没看过画面"，**不许当成通过**。确实要先推进可用 `--no-evidence`，但交付时必须写明没看过。
+解析通过不等于跑起来，跑起来不等于看得对：文字挤出色块、面板溢出、元素没出现，只有看图才发现。Unity、Cocos 与 Unreal 没有插件内置可用的无人值守截图能力，脚本会如实返回 `NOT ASSESSED`；此时用 `--capture-cmd` 给命令，或明说"没看过画面"，**不许当成通过**。确实要先推进可用 `--no-evidence`，但交付时必须写明没看过。
 
 构建失败就把日志原样交给对应引擎工程师，不要自己猜。记录实际测试、平台兼容及候选包证据，邀请负责人评审后再确认 Gold / Release。文档 `advance` 不会自动通过 Alpha、Beta、Gold 或签署发布。
 

@@ -49,6 +49,9 @@ def now():
 def detect(project: Path):
     if (project / "project.godot").exists():
         return "godot"
+    # Unreal: .uproject 是工程根的标志文件，优先判定，避免与其它引擎的特征目录混淆。
+    if any(project.glob("*.uproject")):
+        return "unreal"
     # Unity: 只认 ProjectSettings/ProjectVersion.txt。不要用 Assets 目录判断——
     # Windows 文件系统大小写不敏感，Cocos 的 assets/ 会被误判成 Unity 的 Assets/。
     if (project / "ProjectSettings" / "ProjectVersion.txt").exists():
@@ -115,6 +118,18 @@ def cmd_cocos(project, preset, out):
         "平台取值示例: web-mobile / web-desktop / android / ios / wechatgame / bytedance-mini-game。",
         "小游戏构建后还需用对应开发者工具打开产出目录。",
         "建议先手动在编辑器里构建一次，确认配置无误后再脚本化。",
+    ]
+
+
+def cmd_unreal(project, preset, out):
+    return None, [
+        "Unreal Engine 打包需调用 RunUAT BuildCookRun（路径随 UE 安装位置变化）：",
+        '  RunUAT.bat BuildCookRun -project="<项目>/<Name>.uproject" '
+        "-platform=<平台> -clientconfig=Development -build -cook -stage -pak -archive "
+        "-archivedirectory=<输出目录>",
+        "先用编辑器手动打包一次确认 Cook 与打包配置；失败只从日志第一条错误开始定位，忽略连锁报错。",
+        "Android / iOS 的 SDK、NDK 与签名版本区间以 Epic 官方文档当前版本为准，不要写死数字。",
+        "本脚本不代跑 UE 打包；手动产出后用 --verify 校验产物目录。",
     ]
 
 
@@ -252,6 +267,15 @@ def capture_command(engine, project, evidence_dir, scene, frames, capture_cmd):
             "把命令用 --capture-cmd 传进来即可自动留证；否则本步记为 NOT ASSESSED。",
         ], "NOT_ASSESSED"
 
+    if engine == "unreal":
+        return None, [
+            "Unreal Engine 没有插件内置可用的无人值守截图 CLI。",
+            "两条可行路径：",
+            '  a. 打包后用 -ExecCmds="HighResShot 1280x720" 或 -game 启动时注入控制台命令截图；',
+            "  b. 在关卡蓝图/代码里等若干帧后调 FScreenshotRequest::RequestScreenshot 再退出。",
+            "把命令用 --capture-cmd 传进来即可自动留证；否则本步记为 NOT ASSESSED。",
+        ], "NOT_ASSESSED"
+
     return None, [f"未知引擎: {engine}"], "NOT_ASSESSED"
 
 
@@ -368,7 +392,7 @@ def run_capture(project: Path, engine, name, scene=None, frames=DEFAULT_FRAMES,
 def main():
     ap = argparse.ArgumentParser(description="构建检查、产物校验与运行留证")
     ap.add_argument("--project", default=".")
-    ap.add_argument("--engine", choices=["auto", "godot", "unity", "cocos"], default="auto")
+    ap.add_argument("--engine", choices=["auto", "godot", "unity", "cocos", "unreal"], default="auto")
     ap.add_argument("--preset")
     ap.add_argument("--out")
     ap.add_argument("--run", action="store_true")
@@ -379,7 +403,7 @@ def main():
     ap.add_argument("--scene", help="启动直接进入的场景/地图，避免靠菜单点进去")
     ap.add_argument("--frames", type=int, default=DEFAULT_FRAMES,
                     help=f"截图前让引擎渲染的帧数（默认 {DEFAULT_FRAMES}）")
-    ap.add_argument("--capture-cmd", help="自定义启动+截图命令（Unity/Cocos 需要）")
+    ap.add_argument("--capture-cmd", help="自定义启动+截图命令（Unity/Cocos/Unreal 需要）")
     ap.add_argument("--dry-run", action="store_true", help="只打印命令，不执行")
     args = ap.parse_args()
 
@@ -396,7 +420,7 @@ def main():
 
     engine = args.engine if args.engine != "auto" else detect(project)
     if not engine:
-        print("无法识别引擎。请显式指定 --engine godot|unity|cocos", file=sys.stderr)
+        print("无法识别引擎。请显式指定 --engine godot|unity|cocos|unreal", file=sys.stderr)
         return 1
     print(f"引擎: {engine}   项目: {project}")
 
@@ -411,6 +435,8 @@ def main():
         cmd, notes = cmd_godot(project, args.preset, args.out)
     elif engine == "unity":
         cmd, notes = cmd_unity(project, args.preset, args.out)
+    elif engine == "unreal":
+        cmd, notes = cmd_unreal(project, args.preset, args.out)
     else:
         cmd, notes = cmd_cocos(project, args.preset, args.out)
 

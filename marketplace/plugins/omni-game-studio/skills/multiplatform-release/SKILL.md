@@ -5,7 +5,7 @@ description: Reference library for multiplatform game engineering — three-engi
 
 # 多引擎多平台工程与发布规范（参考库）
 
-本技能是「全平台游戏开发专家团」的共享参考资料库，覆盖 **Cocos Creator / Unity / Godot** 三引擎与 **微信抖音小游戏、Android、iOS、HarmonyOS、Windows、Web、Linux** 七类分发目标。
+本技能是「全平台游戏开发专家团」的共享参考资料库，覆盖 **Cocos Creator / Unity / Godot** 三引擎与 **微信抖音小游戏、Android、iOS、HarmonyOS、Windows、Web、Linux** 七类分发目标。**Unreal Engine 5 未纳入本矩阵**：其平台支持结论由 `unreal-engineer` 按 UE 大版本 + 目标平台单独评估，并以 Epic 官方文档核实，不套用本文件的三引擎判断。
 
 ## 查哪份文件
 

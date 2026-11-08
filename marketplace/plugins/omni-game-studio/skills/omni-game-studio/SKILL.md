@@ -1,6 +1,6 @@
 ---
 name: omni-game-studio
-description: Orchestrate a full game production pipeline across Cocos Creator, Unity and Godot — design, engineering, art, audio, QA and multiplatform release to WeChat/Douyin mini games, Android, iOS, HarmonyOS, Windows, Web and Linux. Use when planning a new game, choosing an engine, porting to another platform, fixing package size or performance, or preparing a release.
+description: Orchestrate a full game production pipeline across Cocos Creator, Unity, Godot and Unreal Engine 5 — design, engineering, art, audio, QA and multiplatform release to WeChat/Douyin mini games, Android, iOS, HarmonyOS, Windows, Web and Linux. Use when planning a new game, choosing an engine, porting to another platform, fixing package size or performance, or preparing a release.
 ---
 
 # 全平台游戏开发专家团 · 编排
@@ -19,12 +19,13 @@ description: Orchestrate a full game production pipeline across Cocos Creator, U
 | `cocos-engineer` | Cocos Creator 3.x 架构、性能、包体分包、小游戏/原生构建 | 项目已定 Cocos 时的一切技术问题 |
 | `unity-engineer` | Unity 工程架构、实现、性能剖析与平台构建 | 项目已定 Unity |
 | `godot-engineer` | Godot 工程架构、实现、性能剖析与平台导出 | 项目已定 Godot |
+| `unreal-engineer` | UE5 模块与目录划分、蓝图/C++ 分层、Gameplay Framework、Cook 与打包 | 项目已定 Unreal |
 | `game-art-director` | 风格定调、UI 规范、资源规格、特效方向、画质分级 | 需要视觉方案、资源规格、UI 规范时 |
 | `game-audio-designer` | 音乐音效设计、交互音频、压缩预算、平台音频差异 | 需要音频方案、交互音频表、音频瘦身时 |
 | `game-qa-engineer` | 测试策略、兼容矩阵、性能验收、准入判定 | 需要测试计划、验收结论、上线准入判断时 |
 | `game-release-operator` | 七平台发布、包体与合规、审核过审、运营节奏 | 需要发布方案、平台规则卡、资质清单、排期时 |
 
-**配套参考库**：`multiplatform-release` 技能，参考文件在 `skills/multiplatform-release/references/`：`engine-matrix.md`（三引擎与平台支持矩阵）、`platform-matrix.md`、`release-checklist.md`、`project-structure.md`。引擎未定时由你结合平台约束与矩阵做选型，确认后再调用对应引擎技能；涉及包体上限、合规红线、引擎能力的问题，先查参考库和官方文档，**不要凭记忆给数字**。
+**配套参考库**：`multiplatform-release` 技能，参考文件在 `skills/multiplatform-release/references/`：`engine-matrix.md`（Cocos / Unity / Godot 三引擎与平台支持矩阵）、`platform-matrix.md`、`release-checklist.md`、`project-structure.md`。Unreal Engine 5 未纳入该矩阵，平台支持结论由 `unreal-engineer` 按 UE 大版本 + 目标平台单独评估并以 Epic 官方文档核实。引擎未定时由你结合平台约束与矩阵做选型，确认后再调用对应引擎技能；涉及包体上限、合规红线、引擎能力的问题，先查参考库和官方文档，**不要凭记忆给数字**。
 
 **配套流水线**：`game-production-pipeline` 技能。当用户要"从想法一路做到能上线"时，走那条流水线（固定工件路径 + 阶段门禁 + 资源脚本 + 构建验证），不要只停在文档层。
 
@@ -55,7 +56,7 @@ python scripts/omni_state.py evidence check --root .                  # 这份�
 
 解析通过不等于跑起来，跑起来不等于看得对——文字挤出色块、面板溢出、元素没出现，只有看图才发现。`receipt.json` 绑定改动文件的 sha256：之后改了任何一个被绑定的文件，这份证据就显示过期，那时它不再是证据，要重新截。
 
-Unity 与 Cocos 没有内置的无人值守截图能力。脚本会如实返回 `NOT ASSESSED`，不会假装成功：要么用 `--capture-cmd` 把自定义命令传进来，要么明说"没看过画面"，**不许当成通过**。
+Unity、Cocos 与 Unreal 没有插件内置可用的无人值守截图能力。脚本会如实返回 `NOT ASSESSED`，不会假装成功：要么用 `--capture-cmd` 把自定义命令传进来，要么明说"没看过画面"，**不许当成通过**。
 
 关键节点之后写检查点，让下一个会话能接着干（尤其在被压缩之前）：
 
@@ -84,8 +85,8 @@ Phase 1（串行）
   game-release-operator → 平台约束卡（各目标平台包体上限、审核要求、资质前置）
         ↓ 这是选型的硬边界
 Phase 2（串行）
-  你读取 `skills/multiplatform-release/references/engine-matrix.md`，按平台支持 30% / 包体性能 25% / 团队技能 20% / 生态 SDK 15% / 授权成本 10% 对 Cocos、Unity、Godot 做矩阵比较
-  可用时分别请 cocos-engineer、unity-engineer、godot-engineer 只读评估各自引擎的适配条件与风险
+  你读取 `skills/multiplatform-release/references/engine-matrix.md`，按平台支持 30% / 包体性能 25% / 团队技能 20% / 生态 SDK 15% / 授权成本 10% 对 Cocos、Unity、Godot 做矩阵比较；Unreal Engine 5 未纳入该矩阵，由 unreal-engineer 按 UE 大版本 + 目标平台单独评估，平台支持结论以 Epic 官方文档核实为准
+  可用时分别请 cocos-engineer、unity-engineer、godot-engineer、unreal-engineer 只读评估各自引擎的适配条件与风险
         汇总时标明证据、版本与「结论会反转的条件」
         ↓
 Phase 3（你）
@@ -100,7 +101,7 @@ Phase 1（串行）
     核心循环 / 系统清单 / 关卡节奏 / 叙事框架 / 留存假设
         ↓ 全文传递，不要摘要
 Phase 2（串行派单，输入 = GDD v1）
-  【引擎工程师：cocos-engineer、unity-engineer 或 godot-engineer】→ 技术方案
+  【引擎工程师：cocos-engineer、unity-engineer、godot-engineer 或 unreal-engineer】→ 技术方案
   game-art-director   → 美术方案
   game-audio-designer → 音频方案
   （三方都要读同一份 GDD；若 GDD 没写清目标机型下限与平台，先让策划补）
@@ -153,7 +154,8 @@ Phase 4  你给 go / no-go + 理由
 | Cocos 的代码 / 性能 / 包体 / SDK | `cocos-engineer` |
 | Unity 的实现、性能、包体或构建 | `unity-engineer` |
 | Godot 的实现、性能、包体或导出 | `godot-engineer` |
-| 引擎选型 | 你依据平台约束与三引擎矩阵比较，必要时征询三个引擎工程师 |
+| Unreal 的模块、蓝图/C++、Cook 或打包 | `unreal-engineer` |
+| 引擎选型 | 你依据平台约束与三引擎矩阵比较；Unreal 由 unreal-engineer 单独评估，必要时征询四个引擎工程师 |
 | 跨引擎迁移 | 同时调用源引擎与目标引擎的工程技能，逐项清点可复用、需改造、必须重写的内容 |
 | 风格怎么定、UI 怎么设计、资源怎么压、特效怎么做 | `game-art-director` |
 | 音效怎么设计、音频怎么压、声音不响 | `game-audio-designer` |

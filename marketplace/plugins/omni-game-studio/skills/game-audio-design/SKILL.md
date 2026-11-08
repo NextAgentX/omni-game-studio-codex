@@ -46,7 +46,7 @@ description: Design game music and sound effects, build interactive audio event 
 - 每条音效给具体时长（0.08s / 1.2s），不给"短促"；体积用 KB 给量级，超预算要说超多少、砍哪条
 - 不给未压缩方案：任何"先用 wav 后面再压"都必须附压缩后目标值
 - 小游戏音频解锁要前置：多数平台要求首次交互后才能播放，BGM 启动时机必须写进方案
-- 交互音频表要标引擎组件名：Cocos 用 AudioSource / AudioClip，Unity 用 AudioSource + Audio Mixer，Godot 用 AudioStreamPlayer(2D/3D) + Audio Bus
-- 中间件成本算清：Wwise / FMOD 在 Unity 最成熟，Godot 需第三方集成，Cocos 支持有限；小项目通常不划算，直接给"用/不用"建议
+- 交互音频表要标引擎组件名：Cocos 用 AudioSource / AudioClip，Unity 用 AudioSource + Audio Mixer，Godot 用 AudioStreamPlayer(2D/3D) + Audio Bus，Unreal 用 Audio Component + Sound Cue / MetaSound
+- 中间件成本算清：Wwise / FMOD 在 Unity 与 Unreal 有官方集成、最成熟，Godot 需第三方集成，Cocos 支持有限；小项目通常不划算，直接给"用/不用"建议
 - 不替工程师写播放代码，不越界做混音母带
 - 用户要求实际音频时，按 `game-audio-production` 使用可用 AI 工具或已授权服务；如能力不可用，报告缺口。程序合成与 AI 生成应明确区分。

@@ -6,7 +6,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/NextAgentX/omni-game-studio-codex?style=social)](https://github.com/NextAgentX/omni-game-studio-codex/stargazers) [![Issues](https://img.shields.io/github/issues/NextAgentX/omni-game-studio-codex)](https://github.com/NextAgentX/omni-game-studio-codex/issues) [![CI](https://github.com/NextAgentX/omni-game-studio-codex/actions/workflows/ci.yml/badge.svg)](https://github.com/NextAgentX/omni-game-studio-codex/actions/workflows/ci.yml)
 
-Omni Game Studio gives Codex an engine-aware toolkit for game production. It brings together focused skills, optional specialist role prompts, starter projects, document templates, and production scripts for **Cocos Creator, Unity, and Godot**.
+Omni Game Studio gives Codex an engine-aware toolkit for game production. It brings together focused skills, optional specialist role prompts, starter projects, document templates, and production scripts for **Cocos Creator, Unity, Godot, and Unreal Engine 5**. It also adds an optional software copyright (软著) filing line for rights protection and store submission.
 
 Use it for one focused task in an existing game or for a project that is still an idea. The workflow follows your chosen engine and project stage; it does not force an existing project through a from-scratch setup.
 
@@ -15,6 +15,7 @@ Use it for one focused task in an existing game or for a project that is still a
 - [Why this project](#why-this-project)
 - [What is included](#what-is-included)
 - [Production workflow](#production-workflow)
+- [Software copyright filing](#software-copyright-filing)
 - [Getting started](#getting-started)
 - [AI art, animation, and audio](#ai-art-animation-and-audio)
 - [Templates, scripts, and checks](#templates-scripts-and-checks)
@@ -33,11 +34,11 @@ Omni Game Studio provides focused workflows for those jobs. It helps turn requir
 
 | Area | Included |
 |---|---|
-| Skills | 14 Codex skills for orchestration, design, engine engineering, assets, QA, release, and live operations |
-| Optional role prompts | 8 specialist TOML profiles: Cocos, Unity, Godot, art, audio, narrative, QA, and release |
-| Production scripts | 13 Python tools for AI media adapters, asset processing, manifests, builds, run evidence, audio, and pipeline state |
-| Document templates | 10 project documents, including a production roadmap, Sprint review, and G1–G5 milestone record |
-| Engine starters | Small starter projects for Godot 4, Unity, and Cocos Creator 3.x |
+| Skills | 20 Codex skills: 15 for game production and 5 for China software copyright filing |
+| Optional role prompts | 13 specialist TOML profiles: 9 game roles (Cocos, Unity, Godot, Unreal, art, audio, narrative, QA, release) and 4 copyright-filing roles |
+| Production scripts | 16 Python tools for AI media adapters, asset processing, manifests, builds, run evidence, audio, pipeline state, and copyright document checks |
+| Document templates | 14 documents: 10 production templates plus 4 copyright-filing templates (manual and application fields, self-assessment, HTML guide, FAQ) |
+| Engine starters | Small starter projects for Godot 4, Unity, and Cocos Creator 3.x (no Unreal Engine 5 starter yet) |
 
 #### Skill map
 
@@ -45,9 +46,10 @@ Omni Game Studio provides focused workflows for those jobs. It helps turn requir
 |---|---|
 | Orchestration and production pipeline | `omni-game-studio`, `game-production-pipeline` |
 | Design | `game-narrative-design`, `game-art-direction`, `game-audio-design` |
-| Engine engineering | `cocos-engineering`, `unity-engineering`, `godot-engineering` |
+| Engine engineering | `cocos-engineering`, `unity-engineering`, `godot-engineering`, `unreal-engineering` |
 | Art, animation, and audio production | `game-art-production`, `game-animation-production`, `game-audio-production` |
 | QA, platforms, and release | `game-qa-testing`, `multiplatform-release`, `game-release-liveops` |
+| Software copyright filing | `copyright-filing`, `software-name-checker`, `copyright-material-kit`, `copyright-risk-audit`, `copyright-filing-guide` |
 
 The specialist profiles in `subagents/` are optional. Skills remain usable when those role profiles are not installed; Codex can do the work directly.
 
@@ -64,6 +66,24 @@ The production pipeline follows project milestones, with evidence at each review
 7. **Live operations:** feed player reports, stability, and product metrics into the next backlog and release cycle.
 
 The seven document gates (`brief`, `gdd`, `tech`, `art`, `audio`, `qa`, and `release`) organize project artifacts; they are not substitutes for G1–G5 reviews. `omni_state.py` checks document structure and TODOs. It cannot verify a playable build, test results, device compatibility, or release approval.
+
+### Software copyright filing
+
+Games often need a China software copyright registration (软著) before store submission or rights enforcement. The `copyright-filing` skill runs a four-phase SOP: **Phase 0** confirm the source directory, full software name and version, and copyright owner; **Phase 0.5** pre-check and lock the name (never skipped — the name must be byte-identical in the source-document header, manual cover, and application form); **Phase 1** generate documents in series; **Phase 2** run the risk audit and beginner guide in parallel; **Phase 3** assemble a submission package with an unabridged red-line list. It routes by W1–W7 workflows and also supports single-role direct dispatch.
+
+Supporting skills: `software-name-checker` (13 naming rules, six-channel checks, three verdicts), `copyright-material-kit` (60-page / 50-lines-per-page source document, manual, application form, material list), `copyright-risk-audit` (12 red/yellow/green risks, pre-submission self-assessment, red lines), and `copyright-filing-guide` (single-file HTML beginner guide plus FAQ).
+
+Three zero-dependency scripts back it (stdlib only, offline, no API key):
+
+```bash
+python scripts/copyright_name_check.py --name "星轨塔防游戏软件" --version V1.0 --industry 游戏 --json
+python scripts/copyright_source_doc.py --root . --name "星轨塔防游戏软件" --version V1.0 --out copyright-out/source.txt
+python scripts/copyright_audit.py --root copyright-out --name "星轨塔防游戏软件" --version V1.0
+```
+
+Templates live in `templates/copyright/`: a manual skeleton with application fields and material list, a pre-submission self-assessment checklist, a single-file HTML guide report, and an FAQ.
+
+State the boundary honestly: Chinese software copyright registration is a **formality review**; the registry does not compare names against existing registrations. Name checking exists to avoid trademark and app-store conflicts, not to pass the exam. The scripts are static checks whose output is paginated text and HTML that must be exported to PDF before filing. They do not replace manual verification of the six channels or the official review, do not promise approval, and do not make legal judgments. Codex has no WorkBuddy team runtime, so the collaboration is expressed as a process contract rather than tool calls.
 
 ### Getting started
 
@@ -90,6 +110,7 @@ Example requests:
 - “Review this Godot project and fix the input bug without changing its scene architecture.”
 - “Plan a vertical slice for this Unity game and list the build evidence needed for G2.”
 - “Create an art and audio production plan for the next playable Sprint.”
+- “Run a software copyright filing for this game: lock the name, then produce the source document, manual, risk audit and a beginner guide.”
 
 ### AI art, animation, and audio
 
@@ -119,7 +140,7 @@ Direct API requests may require separate credentials, service permissions, and p
 
 ### Templates, scripts, and checks
 
-The `templates/docs/` directory contains the seven stage documents and three lifecycle templates: a production roadmap, Sprint review, and milestone review. Engine starters are intentionally small: the Godot 4 starter is runnable, the Unity starter needs its scene-generation step, and the Cocos starter needs a scene created in the editor.
+The `templates/docs/` directory contains the seven stage documents and three lifecycle templates: a production roadmap, Sprint review, and milestone review. `templates/copyright/` holds four filing templates. Engine starters are intentionally small: the Godot 4 starter is runnable, the Unity starter needs its scene-generation step, and the Cocos starter needs a scene created in the editor.
 
 The `scripts/` directory includes:
 
@@ -129,6 +150,7 @@ The `scripts/` directory includes:
 - `validate_assets.py` and `build_check.py` for asset and build checks; `--capture` runs the game and keeps a screenshot with a hash receipt.
 - `gen_placeholder_art.py` for pipeline-only placeholders; placeholders are not final game art.
 - `skill_lint.py` for structural self-tests of the skills themselves.
+- `copyright_name_check.py`, `copyright_source_doc.py`, and `copyright_audit.py` for software copyright filing (stdlib only; see `scripts/README.md`).
 
 Run the script-specific `--help` for parameters. Some image tools require Pillow; audio compression can use ffmpeg. See [scripts/README.md](marketplace/plugins/omni-game-studio/scripts/README.md), [templates/README.md](marketplace/plugins/omni-game-studio/templates/README.md), and [OPTIMIZATION.md](OPTIMIZATION.md) for more detail.
 
@@ -154,6 +176,7 @@ Tagging `vX.Y.Z` runs the release workflow: it re-runs all checks, refuses to pu
 - Run actual builds and tests, inspect generated media in-game, and verify target-device and platform behavior before release.
 - AI model access, API features, pricing, and usage terms depend on the provider and account. Verify current terms before commercial use.
 - The included 2D-oriented animation flow does not replace a full 3D modeling, rigging, or video-production pipeline.
+- Copyright filing scripts produce paginated text and HTML that must be exported to PDF/DOCX before submission; they are static checks, not legal advice, and do not guarantee registration.
 
 ### Contributing
 
