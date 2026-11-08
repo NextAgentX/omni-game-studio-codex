@@ -1,4 +1,10 @@
-# v3.4.0 Unity / Godot 工程技能拆分
+# v3.4.1 AgentX 品牌与项目说明
+
+- 将插件市场名、开发者显示名及安装说明统一为 AgentX 品牌。
+- 新增项目根 README，介绍插件能力、安装入口、AI 资源流程、贡献方式和 Star 支持。
+- 添加用户提供的支付宝与微信支付二维码，供自愿请咖啡支持项目维护。
+
+## v3.4.0 Unity / Godot 工程技能拆分
 
 - 将原 `unity-godot-engineering` 拆为独立的 `unity-engineering` 和 `godot-engineering` 技能，分别聚焦各自的架构、实现、性能剖析与构建/导出。
 - 将可选工程子代理同步拆为 `unity-engineer` 与 `godot-engineer`，并更新 Cocos、流水线及总编排中的派发路由。

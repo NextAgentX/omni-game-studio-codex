@@ -1,4 +1,4 @@
-# Omni Game Studio v3.4.0
+# Omni Game Studio v3.4.1
 
 面向 Cocos Creator、Unity 与 Godot 的游戏生产插件，包含设计、独立的 Unity/Godot 工程技能、AI 图片、动效、音效、音乐、测试与发布技能。按用户任务选择流程；已有项目不必强制从头建档。
 

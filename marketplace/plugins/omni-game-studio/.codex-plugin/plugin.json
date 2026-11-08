@@ -1,9 +1,9 @@
 {
   "name": "omni-game-studio",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "Game production skills for Cocos Creator, Unity and Godot with concept, vertical slice, sprint, alpha/beta/gold, release and live-ops workflows plus AI image, animation, sound and music guidance.",
   "author": {
-    "name": "JackeyYe"
+    "name": "AgentX"
   },
   "license": "MIT",
   "keywords": [
@@ -34,7 +34,7 @@
     "displayName": "Omni Game Studio",
     "shortDescription": "全引擎全平台游戏专家团 + 正式资源流水线",
     "longDescription": "Game production skills for the full lifecycle: concept, preproduction and vertical slice, iterative playable sprint builds, production, Alpha/Beta/Gold QA gates, multiplatform release and live operations. Includes Cocos, Unity and Godot guidance plus AI image, animated GIF, sprite-sheet, sound and music workflows. Gate templates capture evidence and review decisions; docs-only checks do not claim a build or QA pass.",
-    "developerName": "JackeyYe",
+    "developerName": "AgentX",
     "category": "Engineering",
     "capabilities": [
       "Read",
