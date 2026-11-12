@@ -4,10 +4,12 @@ Run with: python -m unittest discover -s tests -v
 """
 import json
 import os
+import struct
 import subprocess
 import sys
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
@@ -54,8 +56,16 @@ class CaptureRun(unittest.TestCase):
     def _helper(self, root: Path):
         helper = root / "shot.py"
         helper.write_text(
-            "import sys\nfrom pathlib import Path\n"
-            "Path(sys.argv[1]).write_bytes(b'\\x89PNG\\r\\n\\x1a\\nfake')\n",
+            "import struct, sys, zlib\nfrom pathlib import Path\n"
+            "def chunk(kind, data):\n"
+            "    crc = zlib.crc32(kind + data) & 0xffffffff\n"
+            "    return (struct.pack('>I', len(data)) + kind + data\n"
+            "            + struct.pack('>I', crc))\n"
+            "ihdr = struct.pack('>IIBBBBB', 1, 1, 8, 6, 0, 0, 0)\n"
+            "png = (b'\\x89PNG\\r\\n\\x1a\\n' + chunk(b'IHDR', ihdr)\n"
+            "       + chunk(b'IDAT', zlib.compress(b'\\x00' * 5))\n"
+            "       + chunk(b'IEND', b''))\n"
+            "Path(sys.argv[1]).write_bytes(png)\n",
             encoding="utf-8")
         return helper
 
@@ -91,17 +101,68 @@ class CaptureRun(unittest.TestCase):
             cmd = f'"{sys.executable}" "{helper}"'
             verdict, msgs = build_check.run_capture(root, "godot", "g2", capture_cmd=cmd)
             self.assertEqual(verdict, "NOT_ASSESSED", msgs)
-            self.assertTrue(any("没有截图" in m for m in msgs))
+            self.assertTrue(any("没有有效截图" in m for m in msgs), msgs)
+
+    def test_capture_rejects_non_png_payload(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            helper = root / "bad_png.py"
+            helper.write_text(
+                "from pathlib import Path\n"
+                "p = Path('docs/qa/evidence/g2/shot.png')\n"
+                "p.parent.mkdir(parents=True, exist_ok=True)\n"
+                "p.write_bytes(b'not a png')\n",
+                encoding="utf-8")
+            cmd = f'"{sys.executable}" "{helper}"'
+            result = run("build_check.py", "--project", root, "--engine", "godot",
+                         "--capture-only", "g2", "--capture-cmd", cmd)
+            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("不是可解码的 PNG", result.stdout + result.stderr)
+            receipt_path = root / build_check.EVIDENCE_ROOT / "g2" / "receipt.json"
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            self.assertIsNone(receipt["screenshot"], "伪 PNG 不能被登记为截图")
+
+    def test_capture_name_cannot_escape_evidence_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            helper = root / "escape.py"
+            helper.write_text(
+                "from pathlib import Path\n"
+                "p = Path('docs/qa/escape/shot.png')\n"
+                "p.parent.mkdir(parents=True, exist_ok=True)\n"
+                "p.write_bytes(b'\x89PNG\r\n\x1a\nfake')\n",
+                encoding="utf-8")
+            cmd = f'"{sys.executable}" "{helper}"'
+            result = run("build_check.py", "--project", root, "--engine", "godot",
+                         "--capture-only", "../escape", "--capture-cmd", cmd)
+            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("证据名", result.stdout + result.stderr)
+            self.assertFalse((root / "docs" / "qa" / "escape").exists())
+
+
+def _png(width=1, height=1):
+    """Build a minimal, decodable PNG for evidence fixtures."""
+    def chunk(kind, data):
+        crc = zlib.crc32(kind + data) & 0xffffffff
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", crc)
+    ihdr = struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0)
+    row = b"\x00" + b"\x00\x00\x00\x00" * width
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr)
+            + chunk(b"IDAT", zlib.compress(row * height))
+            + chunk(b"IEND", b""))
 
 
 class EvidenceFreshness(unittest.TestCase):
     def _bundle(self, root: Path, sources):
         d = root / omni_state.EVIDENCE_ROOT / "g2"
         d.mkdir(parents=True)
-        (d / "shot.png").write_bytes(b"\x89PNG\r\n\x1a\nfake")
+        shot = d / "shot.png"
+        shot.write_bytes(_png(2, 3))
         (d / "receipt.json").write_text(json.dumps({
             "schema": 1, "at": "2026-11-08T19:00:00+08:00", "engine": "godot",
-            "exit_code": 0, "screenshot": {"path": "shot.png"}, "sources": sources,
+            "exit_code": 0,
+            "screenshot": {"path": "shot.png", "sha256": omni_state.sha256_file(shot)},
+            "sources": sources,
         }), encoding="utf-8")
         return d
 
@@ -138,6 +199,72 @@ class EvidenceFreshness(unittest.TestCase):
             ok, msgs = omni_state.check_evidence(root)
             self.assertFalse(ok, msgs)
             self.assertTrue(any("过期" in m for m in msgs))
+
+    def test_modified_screenshot_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle = self._bundle(root, [])
+            ok, msgs = omni_state.check_evidence(root)
+            self.assertTrue(ok, msgs)
+            (bundle / "shot.png").write_bytes(b"\x89PNG\r\n\x1a\ntampered")
+            ok, msgs = omni_state.check_evidence(root)
+            self.assertFalse(ok, msgs)
+            self.assertTrue(any("截图已改动" in m for m in msgs), msgs)
+
+    def test_invalid_receipt_screenshot_size_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle = self._bundle(root, [])
+            receipt_path = bundle / "receipt.json"
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            receipt["screenshot"]["size"] = [0, -1]
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            ok, msgs = omni_state.check_evidence(root)
+            self.assertFalse(ok, msgs)
+            self.assertTrue(any("截图尺寸" in m for m in msgs), msgs)
+
+    def test_receipt_cannot_whitelist_non_png_as_screenshot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle = self._bundle(root, [])
+            shot = bundle / "shot.png"
+            shot.write_bytes(b"not a png")
+            receipt_path = bundle / "receipt.json"
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            receipt["screenshot"]["sha256"] = omni_state.sha256_file(shot)
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            ok, msgs = omni_state.check_evidence(root)
+            self.assertFalse(ok, msgs)
+            self.assertTrue(any("不是有效 PNG" in m for m in msgs), msgs)
+
+    def test_receipt_size_must_match_actual_png(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle = self._bundle(root, [])
+            receipt_path = bundle / "receipt.json"
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            receipt["screenshot"]["size"] = [99, 99]
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            ok, msgs = omni_state.check_evidence(root)
+            self.assertFalse(ok, msgs)
+            self.assertTrue(any("截图尺寸不符" in m for m in msgs), msgs)
+
+    def test_receipt_screenshot_path_cannot_escape_bundle(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle = self._bundle(root, [])
+            outside = bundle.parent / "outside.png"
+            outside.write_bytes(b"\x89PNG\r\n\x1a\noutside")
+            receipt_path = bundle / "receipt.json"
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            receipt["screenshot"] = {
+                "path": "../outside.png",
+                "sha256": omni_state.sha256_file(outside),
+            }
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            ok, msgs = omni_state.check_evidence(root)
+            self.assertFalse(ok, msgs)
+            self.assertTrue(any("截图路径" in m for m in msgs), msgs)
 
     def test_evidence_cli_and_gate(self):
         with tempfile.TemporaryDirectory() as tmp:

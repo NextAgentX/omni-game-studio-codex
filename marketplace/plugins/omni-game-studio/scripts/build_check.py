@@ -171,17 +171,50 @@ def sha256_file(path: Path):
         return None, 0
 
 
+def png_size(path: Path):
+    """只读 PNG 文件头与 IHDR，返回 (宽, 高)；不是合法 PNG 则返回 None。"""
+    try:
+        with path.open("rb") as f:
+            head = f.read(24)
+    except OSError:
+        return None
+    if (len(head) < 24 or head[:8] != b"\x89PNG\r\n\x1a\n"
+            or head[12:16] != b"IHDR"):
+        return None
+    width = int.from_bytes(head[16:20], "big")
+    height = int.from_bytes(head[20:24], "big")
+    if width <= 0 or height <= 0:
+        return None
+    return [width, height]
+
+
 def image_size(path: Path):
-    """Pillow 存在时读取截图尺寸；不存在就返回 None，不因此判定失败。"""
+    """优先用 Pillow 完整解码；Pillow 不存在时仍校验 PNG 头，不把伪 PNG 当截图。"""
     try:
         from PIL import Image
-    except Exception:
-        return None
+    except ImportError:
+        return png_size(path)
     try:
+        with Image.open(path) as im:
+            im.verify()
         with Image.open(path) as im:
             return list(im.size)
     except Exception:
         return None
+
+
+def evidence_dir_for(project: Path, name: str):
+    """证据名只能是单段目录名，禁止路径分隔符和 . / .. 逃出证据根。"""
+    if (not name or name in {".", ".."} or "/" in name or "\\" in name
+            or Path(name).is_absolute()):
+        return None
+    base = (project / EVIDENCE_ROOT).resolve()
+    target = (base / name).resolve()
+    try:
+        target.relative_to(base)
+    except ValueError:
+        return None
+    return target
 
 
 def _under(path: Path, parent: Path) -> bool:
@@ -315,7 +348,12 @@ def fmt_size(size):
 def run_capture(project: Path, engine, name, scene=None, frames=DEFAULT_FRAMES,
                 capture_cmd=None, dry_run=False):
     """跑起来、截图、写回执。返回 (verdict, messages)。"""
-    evidence_dir = project / EVIDENCE_ROOT / name
+    evidence_dir = evidence_dir_for(project, name)
+    if evidence_dir is None:
+        return "INVALID", [
+            "FAIL: 证据名必须是一段目录名，不能为空、包含 / 或 \\，也不能是 . 或 ..",
+            f"当前值: {name!r}",
+        ]
     cmd, notes, state = capture_command(engine, project, evidence_dir, scene, frames, capture_cmd)
     msgs = list(notes)
 
@@ -363,9 +401,13 @@ def run_capture(project: Path, engine, name, scene=None, frames=DEFAULT_FRAMES,
         "sources": sources,
     }
 
+    dims = image_size(shot) if shot else None
+    if shot and dims is None:
+        msgs.append(f"FAIL: 捕获到的 {shot.name} 不是可解码的 PNG，不能作为画面证据。")
+        shot = None
+
     if shot:
         digest, size = sha256_file(shot)
-        dims = image_size(shot)
         receipt["screenshot"] = {
             "path": shot.name, "sha256": digest, "bytes": size,
             "size": dims,
@@ -374,14 +416,14 @@ def run_capture(project: Path, engine, name, scene=None, frames=DEFAULT_FRAMES,
                     f"({size/1024:.1f} KB {fmt_size(dims)})".replace(" )", ")"))
         msgs.append("尺寸以项目自己的窗口设置为准；--resolution 只是请求，游戏是竖屏就截竖屏。")
     else:
-        msgs.append("FAIL: 证据目录里没有出现任何 png，画面未被捕获。")
+        msgs.append("FAIL: 证据目录里没有出现可解码的 PNG，画面未被捕获。")
 
     (evidence_dir / "receipt.json").write_text(
         json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
     msgs.append(f"回执: {EVIDENCE_ROOT}/{name}/receipt.json（绑定 {len(sources)} 个改动文件）")
 
     if not shot:
-        msgs.append("VERDICT: NOT ASSESSED —— 没有截图，就不算看过。")
+        msgs.append("VERDICT: NOT ASSESSED —— 没有有效截图，就不算看过。")
         return "NOT_ASSESSED", msgs
     if rc != 0:
         msgs.append(f"注意: 进程退出码 {rc}，但已拿到画面。画面是否为预期仍需人/代理判读。")

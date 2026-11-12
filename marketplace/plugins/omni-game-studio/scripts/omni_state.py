@@ -151,6 +151,23 @@ def evidence_bundles(root: Path):
     return bundles
 
 
+def png_size(path: Path):
+    """Read PNG IHDR dimensions without Pillow; reject truncated or non-PNG files."""
+    try:
+        with path.open("rb") as f:
+            head = f.read(24)
+    except OSError:
+        return None
+    if (len(head) < 24 or head[:8] != b"\x89PNG\r\n\x1a\n"
+            or head[12:16] != b"IHDR"):
+        return None
+    width = int.from_bytes(head[16:20], "big")
+    height = int.from_bytes(head[20:24], "big")
+    if width <= 0 or height <= 0:
+        return None
+    return [width, height]
+
+
 def check_evidence(root: Path) -> tuple:
     """返回 (ok, messages)。ok=False 表示不能拿这份证据当"看过"。
 
@@ -175,6 +192,43 @@ def check_evidence(root: Path) -> tuple:
     receipt = latest["receipt"]
     if not receipt:
         return False, msgs + [f"（没有回执）: {name}/receipt.json 缺失或无法解析，无法判断证据覆盖范围。"]
+
+    shot_meta = receipt.get("screenshot")
+    if not isinstance(shot_meta, dict) or not isinstance(shot_meta.get("path"), str):
+        return False, msgs + [
+            "（回执缺少截图信息）: receipt.json 没有 screenshot.path，无法确认是哪张图。"]
+    rel_shot = Path(shot_meta["path"])
+    bundle_dir = latest["dir"].resolve()
+    shot_path = (bundle_dir / rel_shot).resolve()
+    try:
+        shot_path.relative_to(bundle_dir)
+    except ValueError:
+        return False, msgs + [
+            f"（截图路径非法）: {shot_meta['path']!r} 逃出了证据目录 {name}/。"]
+    if not shot_path.is_file():
+        return False, msgs + [
+            f"（截图缺失）: 回执指向 {shot_meta['path']!r}，但该文件不存在。"]
+    actual_digest = sha256_file(shot_path)
+    if not shot_meta.get("sha256"):
+        return False, msgs + [
+            "（截图没有指纹）: 旧版回执未记录 screenshot.sha256，无法判断图片是否被替换；请重新留证。"]
+    if actual_digest != shot_meta["sha256"]:
+        return False, msgs + [
+            "（截图已改动）: 回执记录的 screenshot.sha256 与当前图片不一致，画面不再可信；请重新留证。"]
+    actual_size = png_size(shot_path)
+    if actual_size is None:
+        return False, msgs + [
+            "（截图不是有效 PNG）: 文件头或 IHDR 无效，不能作为画面证据。"]
+    shot_size = shot_meta.get("size")
+    if shot_size is not None and (not isinstance(shot_size, list)
+                                  or len(shot_size) != 2
+                                  or not all(isinstance(v, int) and v > 0 for v in shot_size)):
+        return False, msgs + [
+            "（截图尺寸无效）: receipt.json 里的 screenshot.size 必须是两个正整数。"]
+    if shot_size is not None and shot_size != actual_size:
+        return False, msgs + [
+            "（截图尺寸不符）: 回执记录 %dx%d，实际 PNG 为 %dx%d，证据不可信。"
+            % (shot_size[0], shot_size[1], actual_size[0], actual_size[1])]
 
     if receipt.get("exit_code") not in (0, None):
         msgs.append(f"注意: 捕获时进程退出码 {receipt.get('exit_code')}，画面可用但进程非正常退出。")
