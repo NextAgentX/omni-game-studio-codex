@@ -329,21 +329,28 @@ def check_tests(plugin: Path, root: Path, rep: Reporter) -> None:
         rep.ok(path.name)
 
 
-def check_version_docs(root: Path, version: str | None, rep: Reporter) -> None:
+def check_version_docs(root: Path, plugin: Path, version: str | None, rep: Reporter) -> None:
     rep.section("version consistency")
     if not version:
         return
     docs = {
-        "INSTALL.md": (root / "INSTALL.md"),
-        "OPTIMIZATION.md": (root / "OPTIMIZATION.md"),
+        "INSTALL.md": root / "INSTALL.md",
+        "OPTIMIZATION.md latest heading": root / "OPTIMIZATION.md",
+        "plugin README.md": plugin / "README.md",
     }
-    found = False
     for label, path in docs.items():
-        if path.is_file() and version in path.read_text(encoding="utf-8"):
-            rep.ok(f"{label} mentions v{version}")
-            found = True
-    if not found:
-        rep.warn(f"no doc mentions the current version {version}")
+        if not path.is_file():
+            rep.fail(f"{label}: missing; expected current version v{version}")
+            continue
+        first_line = next(
+            (line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()),
+            "",
+        )
+        marker = rf"(?<![\w.])v{re.escape(version)}(?![\w.])"
+        if first_line.startswith("# ") and re.search(marker, first_line):
+            rep.ok(f"{label} heading matches v{version}")
+        else:
+            rep.fail(f"{label} heading does not match current plugin version v{version}: {first_line!r}")
 
 
 def main() -> int:
@@ -363,7 +370,7 @@ def main() -> int:
         check_scripts(plugin, root, rep)
         check_tests(plugin, root, rep)
     check_subagents(root, rep)
-    check_version_docs(root, version, rep)
+    check_version_docs(root, plugin, version, rep)
 
     print(f"\n{rep.checked} checks passed, {len(rep.warnings)} warnings, {len(rep.errors)} errors")
     for err in rep.errors:
