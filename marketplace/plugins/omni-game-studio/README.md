@@ -1,4 +1,4 @@
-# Omni Game Studio v3.6.0
+# Omni Game Studio v3.6.1
 
 面向 Cocos Creator、Unity、Godot 与 Unreal Engine 5 的游戏生产插件，包含设计、独立的 Unity/Godot/Unreal 工程技能、AI 图片、动效、音效、音乐、测试与发布技能。按用户任务选择流程；已有项目不必强制从头建档。Unreal 起步模板暂未提供，由 `unreal-engineer` 生成工程骨架。
 

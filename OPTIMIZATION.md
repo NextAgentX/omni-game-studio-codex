@@ -1,3 +1,7 @@
+# v3.6.1
+
+本补丁收紧 G2 截图证据校验：`build_check.py` 在采集阶段验证 PNG 签名、图片可解码性与尺寸，拒绝伪造或空白截图；`omni_state.py` 在 receipt 中登记截图 SHA-256 与尺寸，并在证据门禁中核对摘要、尺寸与文件新鲜度，防止截图被篡改后仍被当作有效证据。回归测试新增可解码 PNG 夹具、伪 PNG 拒绝、路径逃逸防护和截图摘要变更用例。发布前校验：validate_repo 69 checks / 0 warnings / 0 errors、skill_lint 20/20 PASS、unittest 38 tests OK。`plugin.json` 版本 3.6.1 与 tag `v3.6.1` 一致，INSTALL 标题与缓存路径示例同步。
+
 # v3.6.0
 
 本版把此前累积的未发布能力线一次性定版：`plugin.json` 版本 3.6.0 与 tag `v3.6.0` 一致，INSTALL 标题与缓存路径示例同步。发布前校验：validate_repo 69 checks / 0 warnings / 0 errors、skill_lint 20/20 PASS、unittest 31 tests OK。

@@ -1,4 +1,4 @@
-# Omni Game Studio v3.6.0 安装与 AI 素材使用
+# Omni Game Studio v3.6.1 安装与 AI 素材使用
 
 本仓库支持通过 GitHub 插件市场在线安装和升级，也保留本地市场安装方式；包含 20 个技能（15 个游戏制作 + 5 个软著申报）、16 个脚本、14 份文档模板（10 份制作文档 + 4 份软著模板）、三个游戏引擎起步模板，以及 13 个可选角色配置。Unreal Engine 5 有独立技能与角色，但暂未提供起步模板，需由 `unreal-engineer` 生成工程骨架。插件不会自带 API 凭证或保证模型调用额度。
 
@@ -60,7 +60,7 @@ Codex 会话内置的图像生成工具由宿主提供，可直接生成或编�
 
 ```bash
 # 根据实际插件缓存路径调整 PL
-PL="$HOME/.codex/plugins/cache/omni-game-studio-plugins/omni-game-studio/3.6.0"
+PL="$HOME/.codex/plugins/cache/omni-game-studio-plugins/omni-game-studio/3.6.1"
 python "$PL/scripts/split_sprite_sheet.py" --input raw/run_sheet.png --cols 4 --rows 2 --frames 8 --fps 12 --loop --out-dir assets/animation/run --backup-dir doc/temp/run-frames
 python "$PL/scripts/gen_ai_image.py" --prompt "small astronaut waves, 8-frame animation" --format gif --frames 8 --out assets/animation/wave.gif --backup-dir doc/temp
 ```
@@ -73,7 +73,7 @@ python "$PL/scripts/gen_ai_image.py" --prompt "small astronaut waves, 8-frame an
 
 ```bash
 # 先预览，不联网、不计费、不需要密钥
-PL="$HOME/.codex/plugins/cache/omni-game-studio-plugins/omni-game-studio/3.6.0"
+PL="$HOME/.codex/plugins/cache/omni-game-studio-plugins/omni-game-studio/3.6.1"
 python "$PL/scripts/gen_ai_audio.py" sfx --prompt "short bright pickup chime" --duration 1 --out assets/audio/pickup.mp3 --dry-run
 # 去掉 --dry-run 后才实际请求生成
 python "$PL/scripts/gen_ai_audio.py" music --prompt "gentle space exploration" --duration 30 --instrumental --out assets/audio/main.mp3
